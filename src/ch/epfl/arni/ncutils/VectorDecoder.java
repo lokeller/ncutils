@@ -1,5 +1,6 @@
 package ch.epfl.arni.ncutils;
 
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class VectorDecoder implements Decoder {
             return decodedBlocks.size();
         }
 
-	public HashSet<Integer> decode(FiniteFieldVector p) throws LinearDependantException {
+	public Map<Integer, FiniteFieldVector> decode(FiniteFieldVector p) throws LinearDependantException {
                 
                 
                 int [][] mul = ff.mul;
@@ -154,7 +155,7 @@ public class VectorDecoder implements Decoder {
 		
 		/* look for decodable blocks */
 		
-		HashSet<Integer> willDecode = new HashSet<Integer>();
+		HashMap<Integer, FiniteFieldVector> willDecode = new HashMap<Integer, FiniteFieldVector>();
 		Vector<Integer> elLines = new Vector<Integer>();
 		outer: for (int j = 0 ; j < packetCount; j++) {
 			boolean found = false;
@@ -171,14 +172,14 @@ public class VectorDecoder implements Decoder {
 				}
 			}
 			if (pos != -1) {
-				willDecode.add(blocks.elementAt(pos));
+				willDecode.put(blocks.elementAt(pos), null);
 				elLines.add(j);
 			}
 		}
 		
 		
 		/* remove the columns corresponing to the decodable blocks */
-		for (Integer b : willDecode) {
+		for (Integer b : willDecode.keySet()) {
 			decodeMatrix.removeElementAt(blocks.indexOf(b));			
 			blocks.remove(b);
 		}
@@ -191,7 +192,7 @@ public class VectorDecoder implements Decoder {
 			packetCount--;		
 		}
 		 
-		decodedBlocks.addAll(willDecode);
+		decodedBlocks.addAll(willDecode.keySet());
 		
 		return willDecode;			
 		

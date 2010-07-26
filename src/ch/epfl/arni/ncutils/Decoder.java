@@ -5,7 +5,7 @@
 
 package ch.epfl.arni.ncutils;
 
-import java.util.HashSet;
+import java.util.Map;
 
 /**
  *
@@ -13,7 +13,7 @@ import java.util.HashSet;
  */
 public interface Decoder {
 
-    HashSet<Integer> decode(FiniteFieldVector p) throws LinearDependantException;
+    Map<Integer, FiniteFieldVector> decode(FiniteFieldVector p) throws LinearDependantException;
 
     int decodedBlockCount();
 

@@ -127,7 +127,7 @@ public class ArrayDecoder implements Decoder {
 		}                
 
                 /* add the 1 in the inverse matrix */
-                decodeMatrix[packetCount][size+pivot] = 1;
+                decodeMatrix[packetCount][size+packetCount] = 1;
 
 		/* divide the line */		
 
@@ -201,28 +201,13 @@ public class ArrayDecoder implements Decoder {
                         FiniteFieldVector vector = new SparseFiniteFieldVector();
 
                         for ( int j = size ; j < size + usedCols ; j++) {
-                            vector.setCoefficient(colToBlock[j-size], decodeMatrix[i][j]);
+                            vector.setCoefficient(j-size, decodeMatrix[i][j]);
                         }
 
                         willDecode.put(colToBlock[pos], vector);
                         decCount++;
                     }
                 }
-
-
-                for (int i= 0 ; i < size ; i++) {
-                    for (int j = 0 ; j < size ; j++) {
-                        System.out.print(" " + decodeMatrix[i][j]);
-                    }
-                    System.out.print(" | ");
-                    for (int j = size ; j < 2*size ; j++) {
-                        System.out.print(" " + decodeMatrix[i][j]);
-                    }
-
-                    System.out.println();
-                }
-
-                System.out.println("----------------");
 
 		return willDecode;			
 		

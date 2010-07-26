@@ -12,7 +12,9 @@ import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.LinearDependantException;
 import ch.epfl.arni.ncutils.SparseFiniteFieldVector;
 import ch.epfl.arni.ncutils.VectorDecoder;
+import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +34,7 @@ public class Example1 {
         /**
          * This is the number of different blocks that are being sent
          */
-        int size = 500;
+        int size = 10;
 
         /*
          * Creates as many linearly independent vectors as possible
@@ -48,7 +50,9 @@ public class Example1 {
 
             for (int j = 0; j < size ; j++) {
                 vectors[i].setCoefficient(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));
-            }
+            }            
+            //vectors[i].setCoefficient(size-i-1,1);
+            
 
         }
 
@@ -59,6 +63,8 @@ public class Example1 {
         /* store the start time of the decoding */
         long m = System.currentTimeMillis();
 
+        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+
         /* decode one after another all the coding vectors */
         for (int i = 0 ; i < size ; i++) {
             try {
@@ -68,7 +74,12 @@ public class Example1 {
                  * were previously inserted
                  */
 
-                Object o = d.decode(vectors[i]);
+                Map<Integer,FiniteFieldVector> o = d.decode(vectors[i]);
+
+                for (Map.Entry<Integer, FiniteFieldVector> entry : o.entrySet()) {
+                    inverse[entry.getKey()] = entry.getValue();
+                }
+
                 //System.out.println( "Decoded: " + o);
             } catch (LinearDependantException ex) {
 
@@ -77,7 +88,35 @@ public class Example1 {
                 Logger.getLogger(Example1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
+        FiniteField ff = FiniteField.getDefaultFiniteField();
+
+        for (int i= 0 ; i < size ; i++) {
+            for (int j = 0 ; j < size ; j++) {
+                System.out.print(" " + inverse[i].getCoefficient(j));
+            }
+
+            System.out.println();
+        }
+
+        System.out.println("-----------------");
+
+        for (int i= 0 ; i < size ; i++) {
+            for (int j = 0 ; j < size ; j++) {
+
+                int sum = 0;
+                for (int k = 0 ; k < size ; k++) {
+                    sum = ff.sum[sum][ff.mul[vectors[i].getCoefficient(k)][inverse[k].getCoefficient(j)]];
+                }
+
+                System.out.print(" " + sum);
+
+                if (i == j && sum != 1) throw new RuntimeException();
+                if (i != j && sum != 0) throw new RuntimeException();
+            }
+             System.out.println();
+        }
+
         System.out.println("Total decoding time :" + (System.currentTimeMillis() - m));
     }
     
