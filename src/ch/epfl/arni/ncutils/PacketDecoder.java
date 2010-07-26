@@ -5,6 +5,7 @@
 
 package ch.epfl.arni.ncutils;
 
+import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import java.util.Map;
 import java.util.Vector;
 
@@ -15,7 +16,7 @@ import java.util.Vector;
  */
 public class PacketDecoder {
 
-    private Vector<EncodedPacket> packets = new Vector<EncodedPacket>();
+    private Vector<CodedPacket> packets = new Vector<CodedPacket>();
 
     private CodingVectorDecoder codingVectorDecoder;
 
@@ -23,17 +24,17 @@ public class PacketDecoder {
 
     private FiniteField ff;
 
-    public PacketDecoder(int blockCount, int payloadLen) {
-        this(FiniteField.getDefaultFiniteField(), blockCount, payloadLen);
-    }
-
     public PacketDecoder(FiniteField field, int blockCount, int payloadLen) {
         this.ff = field;
-        codingVectorDecoder = new ArrayBasedCodingVectorDecoder(blockCount);
+        codingVectorDecoder = new CodingVectorDecoder(blockCount,ff);
         this.payloadLen = payloadLen;
     }
     
-    public Vector<UncodedPacket> decode(EncodedPacket p) {
+    public Vector<UncodedPacket> decode(CodedPacket p) {
+
+        assert(p.getFiniteField() == ff);
+        assert(p.getCodingCoefficientsCount() == codingVectorDecoder.getCodingCoefficientsCount());
+        
         try {
 
             Map<Integer, FiniteFieldVector> decoded = codingVectorDecoder.decode(p.getCodingVector());
@@ -45,7 +46,7 @@ public class PacketDecoder {
             
             for ( Map.Entry<Integer, FiniteFieldVector> entry : decoded.entrySet() ) {
 
-                FiniteFieldVector decodedPayload = new SparseFiniteFieldVector();
+                FiniteFieldVector decodedPayload = new SparseFiniteFieldVector(ff);
 
                 for ( Integer codedPacketId : entry.getValue().getNonZeroCoefficients()) {
 

@@ -1,5 +1,7 @@
-package ch.epfl.arni.ncutils;
+package ch.epfl.arni.ncutils.impl;
 
+import ch.epfl.arni.ncutils.FiniteField;
+import ch.epfl.arni.ncutils.FiniteFieldVector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -7,7 +9,11 @@ import java.util.Vector;
 public class SparseFiniteFieldVector implements FiniteFieldVector {
 
     private HashMap<Integer, Integer> coefficients = new HashMap<Integer, Integer>();
-    private FiniteField ff = FiniteField.getDefaultFiniteField();
+    private FiniteField ff ;
+
+    public SparseFiniteFieldVector(FiniteField ff) {
+        this.ff = ff;
+    }
 
     @Override
     public String toString() {
@@ -24,6 +30,9 @@ public class SparseFiniteFieldVector implements FiniteFieldVector {
 
     @Override
     public void copyTo(FiniteFieldVector c) {
+
+            assert(c.getFiniteField() == ff);
+
             c.setToZero();
 
             for (Map.Entry<Integer, Integer> e : coefficients.entrySet()) {
@@ -32,11 +41,17 @@ public class SparseFiniteFieldVector implements FiniteFieldVector {
     }
 
     public void setCoefficient(int index, int value) {
+        assert(index >= 0);
+
+        assert(value < ff.getCardinality() && value >= 0);
+
         if (value == 0) coefficients.remove(index);
         else coefficients.put(index, value);
     }
 
     public int getCoefficient(int index) {
+        assert(index >= 0);
+        
         Integer value = coefficients.get(index);
 
         if (value == null) return 0;
@@ -57,10 +72,10 @@ public class SparseFiniteFieldVector implements FiniteFieldVector {
     }
 
     public void add(FiniteFieldVector vector) {
-        
-        Vector<Integer> coeffs = new Vector<Integer>(coefficients.keySet());
 
-        for ( Integer i : coeffs) {
+        assert(vector.getFiniteField() == ff);
+
+        for ( Integer i : vector.getNonZeroCoefficients()) {
             setCoefficient(i, ff.sum[getCoefficient(i)][vector.getCoefficient(i)]);
         }
 
@@ -68,6 +83,8 @@ public class SparseFiniteFieldVector implements FiniteFieldVector {
 
     public void scalarMultiply(int c) {
 
+        assert(c < ff.getCardinality() && c >= 0);
+        
         Vector<Integer> coeffs = new Vector<Integer>(coefficients.keySet());
 
         for ( Integer i : coeffs) {

@@ -5,22 +5,26 @@
 
 package ch.epfl.arni.ncutils;
 
+import ch.epfl.arni.ncutils.impl.DenseFiniteFieldVector;
+import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
+
 import java.util.Vector;
 
 /**
  *
  * @author lokeller
  */
-public class EncodedPacketImpl implements EncodedPacket {
+public class CodedPacket {
 
 
     private int codingCoefficientsCount;
+    private int payloadLength;
     private FiniteFieldVector codingVector;
     private FiniteFieldVector payloadVector;
 
-    public EncodedPacketImpl(int blockCount, UncodedPacket packet) {
+    public CodedPacket(int blockCount, UncodedPacket packet, FiniteField ff) {
 
-        this(blockCount);
+        this(blockCount, packet.getPayload().length, ff);
 
         codingVector.setCoefficient(packet.getId(), 1);
 
@@ -44,12 +48,21 @@ public class EncodedPacketImpl implements EncodedPacket {
 
     }
 
-    public EncodedPacketImpl(int blockCount) {
+    public CodedPacket(int blockCount, int payloadLen, FiniteField ff) {
+        assert(blockCount >= 0);
         this.codingCoefficientsCount = blockCount;
-        codingVector = new SparseFiniteFieldVector();
-        payloadVector = new SparseFiniteFieldVector();
+        this.payloadLength = payloadLen;
 
+        codingVector = new SparseFiniteFieldVector(ff);
+        if (ff.getCardinality() == 16) {
+            payloadVector = new DenseFiniteFieldVector(payloadLen * 2, ff);
+        } else if (ff.getCardinality() == 256) {
+            payloadVector = new DenseFiniteFieldVector(payloadLen, ff);
+        } else {
+            payloadVector = new SparseFiniteFieldVector(ff);
+        }
     }
+
 
     public FiniteFieldVector getCodingVector() {
        return codingVector;
@@ -65,6 +78,8 @@ public class EncodedPacketImpl implements EncodedPacket {
 
 
     public void setCoefficient(int index, int value) {
+        assert( index >= 0);
+        assert(value < getFiniteField().getCardinality() && value >= 0);
         if ( index < codingCoefficientsCount) {
             codingVector.setCoefficient(index, value);
         } else {
@@ -73,6 +88,9 @@ public class EncodedPacketImpl implements EncodedPacket {
     }
 
     public int getCoefficient(int index) {
+
+        assert(index >= 0);
+
         if ( index < codingCoefficientsCount) {
             return codingVector.getCoefficient(index);
         } else {
@@ -81,6 +99,9 @@ public class EncodedPacketImpl implements EncodedPacket {
     }
 
     public void copyTo(FiniteFieldVector c) {
+
+        assert(c.getFiniteField() == getFiniteField());
+
         c.setToZero();
 
         for ( Integer i : getNonZeroCoefficients()) {
@@ -117,7 +138,8 @@ public class EncodedPacketImpl implements EncodedPacket {
     }
 
     public void add(FiniteFieldVector vector) {
-
+        assert(vector.getFiniteField() == getFiniteField());
+        
         FiniteField ff = vector.getFiniteField();
 
         for ( Integer i : vector.getNonZeroCoefficients()) {
@@ -127,9 +149,17 @@ public class EncodedPacketImpl implements EncodedPacket {
     }
 
     public void scalarMultiply(int c) {
-
+        assert(c < getFiniteField().getCardinality() && c >= 0);
         payloadVector.scalarMultiply(c);
         codingVector.scalarMultiply(c);
+    }
+
+    public int getPayloadLength() {
+        return payloadLength;
+    }
+
+    public int getLength() {
+        return codingCoefficientsCount + payloadLength;
     }
 
 

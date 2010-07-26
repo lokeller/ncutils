@@ -26,6 +26,8 @@ public class FiniteField {
     private int Q;
 
     public FiniteField(int q, int m) {
+        
+        if (q < 1 || m < 0) throw new RuntimeException("Invalid field size");
 
         if (q != 2 || m > 16) throw new UnsupportedOperationException("Finite field not supported");
 
@@ -90,6 +92,8 @@ public class FiniteField {
     public FiniteField(int q) {
         this.Q = q;
 
+        if (q < 1) throw new RuntimeException("Invalid field size");
+
         inverse = new int[Q];
         sum = new int[Q][Q];
         mul = new int[Q][Q];
@@ -110,8 +114,7 @@ public class FiniteField {
         for (int b = 0 ; b < Q ; b++) {
                 for (int i = 0 ; i < Q ; i++) {
                     sum[b][i] = (b+i) % Q;
-                    sub[b][i] = (b-i+Q) % Q;
-                    assert(sum[i][sub[b][i]] == b);
+                    sub[b][i] = (b-i+Q) % Q;                    
                     mul[b][i] = (b * i) % Q;
                     div[b][i] = (b * inverse[i]) % Q;
                 }
@@ -123,5 +126,23 @@ public class FiniteField {
     public int getCardinality() {
         return Q;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( obj instanceof FiniteField) {
+            return ((FiniteField) obj).getCardinality() == Q;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 89 * hash + this.Q;
+        return hash;
+    }
+
+
 
 }

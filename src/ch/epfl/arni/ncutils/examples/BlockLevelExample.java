@@ -5,12 +5,12 @@
 
 package ch.epfl.arni.ncutils.examples;
 
-import ch.epfl.arni.ncutils.EncodedPacket;
-import ch.epfl.arni.ncutils.EncodedPacketImpl;
+import ch.epfl.arni.ncutils.CodedPacket;
+import ch.epfl.arni.ncutils.CodedPacket;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.PacketDecoder;
-import ch.epfl.arni.ncutils.SparseFiniteFieldVector;
+import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import ch.epfl.arni.ncutils.UncodedPacket;
 import java.util.Arrays;
 import java.util.Random;
@@ -23,6 +23,8 @@ import java.util.Vector;
 public class BlockLevelExample {
 
     public static void main(String [] args) {
+
+        FiniteField ff = FiniteField.getDefaultFiniteField();
 
         int blockNumber = 10;
         int payloadLen = 10;
@@ -40,10 +42,10 @@ public class BlockLevelExample {
         printUncodedPackets(Arrays.asList(inputPackets), payloadLen);
 
         /* prepare the input packets to be sent on the network */
-        EncodedPacket[] codewords = new EncodedPacket[blockNumber];
+        CodedPacket[] codewords = new CodedPacket[blockNumber];
 
         for ( int i = 0 ; i < blockNumber ; i++) {
-            codewords[i] = new EncodedPacketImpl(blockNumber, inputPackets[i]);
+            codewords[i] = new CodedPacket(blockNumber, inputPackets[i], ff);
         }
 
         System.out.println(" Codewords: ");
@@ -53,17 +55,15 @@ public class BlockLevelExample {
          * the output of the network
          */
 
-        EncodedPacket[] networkOutput = new EncodedPacket[blockNumber];
-
-        FiniteField ff = FiniteField.getDefaultFiniteField();
+        CodedPacket[] networkOutput = new CodedPacket[blockNumber];
 
         Random r = new Random(2131231);
 
-        FiniteFieldVector copy = new SparseFiniteFieldVector();
+        FiniteFieldVector copy = new SparseFiniteFieldVector(ff);
 
         for ( int i = 0 ; i < blockNumber ; i++) {
 
-            networkOutput[i] = new EncodedPacketImpl(blockNumber);
+            networkOutput[i] = new CodedPacket(blockNumber, payloadLen, ff);
 
             for ( int j = 0 ; j < blockNumber ; j++) {
                 int x = r.nextInt(ff.getCardinality());
@@ -79,7 +79,7 @@ public class BlockLevelExample {
         printCodedPackets(Arrays.asList(networkOutput), payloadLenCoeffs);
 
         /* decode the received packets */
-        PacketDecoder decoder = new PacketDecoder(blockNumber, payloadLen);
+        PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLen);
 
         System.out.println(" Decoded packets: ");
         for ( int i = 0; i < blockNumber ; i++) {
@@ -100,8 +100,8 @@ public class BlockLevelExample {
         }
     }
 
-    private static void printCodedPackets(Iterable<EncodedPacket> packets, int payloadLen) {
-        for (EncodedPacket p : packets) {
+    private static void printCodedPackets(Iterable<CodedPacket> packets, int payloadLen) {
+        for (CodedPacket p : packets) {
             for (int k = 0; k < p.getCodingCoefficientsCount(); k++) {
                 System.out.print(" " + p.getCodingVector().getCoefficient(k));
             }

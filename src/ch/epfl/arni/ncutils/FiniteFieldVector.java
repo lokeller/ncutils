@@ -5,8 +5,6 @@
 
 package ch.epfl.arni.ncutils;
 
-import java.util.Iterator;
-
 /**
  *
  * @author lokeller

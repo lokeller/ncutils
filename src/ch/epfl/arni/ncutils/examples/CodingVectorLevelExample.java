@@ -5,13 +5,12 @@
 
 package ch.epfl.arni.ncutils.examples;
 
-import ch.epfl.arni.ncutils.ArrayBasedCodingVectorDecoder;
+import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.LinearDependantException;
-import ch.epfl.arni.ncutils.SparseFiniteFieldVector;
-import ch.epfl.arni.ncutils.VectorDecoder;
+import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -25,6 +24,8 @@ import java.util.logging.Logger;
 public class CodingVectorLevelExample {
 
     public static void main(String[] args) {
+
+        FiniteField ff = FiniteField.getDefaultFiniteField();
 
         /* intializes a random generator with a fixed seed to obtain
          * deterministic results.
@@ -46,7 +47,7 @@ public class CodingVectorLevelExample {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector();
+            vectors[i] = new SparseFiniteFieldVector(ff);
 
             for (int j = 0; j < size ; j++) {
                 vectors[i].setCoefficient(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));
@@ -57,7 +58,7 @@ public class CodingVectorLevelExample {
         }
 
         /* initialize a decoder */
-        CodingVectorDecoder d = new ArrayBasedCodingVectorDecoder(size);
+        CodingVectorDecoder d = new CodingVectorDecoder(size, ff);
         //Decoder d = new VectorDecoder();
 
         /* store the start time of the decoding */
@@ -88,8 +89,6 @@ public class CodingVectorLevelExample {
                 Logger.getLogger(CodingVectorLevelExample.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
-        FiniteField ff = FiniteField.getDefaultFiniteField();
 
         for (int i= 0 ; i < size ; i++) {
             for (int j = 0 ; j < size ; j++) {
