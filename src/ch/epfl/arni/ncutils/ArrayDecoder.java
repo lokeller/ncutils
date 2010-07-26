@@ -1,5 +1,6 @@
 package ch.epfl.arni.ncutils;
 
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,8 +17,6 @@ import java.util.Map;
 
 public class ArrayDecoder implements Decoder {
 		
-	private HashSet<Integer> decodedBlocks = new HashSet<Integer>();
-
 	private int[][] decodeMatrix;
         private int[] colToBlock;
         private int[] blockToCol;
@@ -25,9 +24,10 @@ public class ArrayDecoder implements Decoder {
         private boolean[] isPivot;
         private boolean[] decoded;
         private int usedCols = 0;
+        private int decCount = 0;
 
         public ArrayDecoder(int size) {
-            decodeMatrix = new int[size][size];
+            decodeMatrix = new int[size][size * 2];
             colToBlock = new int[size];
             blockToCol = new int[size];
             pivotPos = new int[size];
@@ -42,17 +42,19 @@ public class ArrayDecoder implements Decoder {
         private FiniteField ff = FiniteField.getDefaultFiniteField();
 
         public int decodedBlockCount() {
-            return decodedBlocks.size();
+            return decCount;
         }
 
-	public HashSet<Integer> decode(FiniteFieldVector p) throws LinearDependantException {
+	public Map<Integer,FiniteFieldVector> decode(FiniteFieldVector p) throws LinearDependantException {
                                 		
                 int [][] mul = ff.mul;
                 int [][] sub = ff.sub;
                 int [][] div = ff.div;
 
+                int size = decodeMatrix.length;
+
 		boolean linearlyDependant = true;
-		
+
 		/* add the column for the new received Integers */
                 for ( Integer b : p.getNonZeroCoefficients()) {
 
@@ -63,9 +65,6 @@ public class ArrayDecoder implements Decoder {
                         tb = usedCols;
                         colToBlock[usedCols] = b;
                         usedCols++;                        
-                    } else {
-                        /* skip already decoded columns*/
-                        if (decoded[tb]) continue;
                     }
 
                     decodeMatrix[packetCount][tb] = p.getCoefficient(b);
@@ -73,11 +72,11 @@ public class ArrayDecoder implements Decoder {
                     linearlyDependant = false;
 
                 }
-
+                
                 if (linearlyDependant) {
                     throw new LinearDependantException();
                 }
-		
+
 		/* simplify the new packet */
 		
 		/* zeros before */
@@ -87,15 +86,22 @@ public class ArrayDecoder implements Decoder {
 
                         if (m == 0) continue;
 
+                        /* entries in the first half */
 			for (int j = 0 ; j < usedCols ; j++) {                                
-
                                 int val = decodeMatrix[packetCount][j];
 				int val2 = decodeMatrix[i][j];
-                                decodeMatrix[packetCount][j] = sub[val][mul[val2][m]];				
+                                decodeMatrix[packetCount][j] = sub[val][mul[val2][m]];
+			}
+
+                        /* entries in the second half */
+                        for (int j = size ; j < usedCols + size; j++) {
+                                int val = decodeMatrix[packetCount][j];
+				int val2 = decodeMatrix[i][j];
+                                decodeMatrix[packetCount][j] = sub[val][mul[val2][m]];
 			}
 			
 		}
-		
+
 		/* find pivot on the line */
 		
 		int pivot = -1;
@@ -112,21 +118,36 @@ public class ArrayDecoder implements Decoder {
 		/* if the packet is not li stop here */
 		
 		if (pivot == -1 ) {                        
+                    
+                        /* cleanup the second half of the decode matrix */
+                        for (int j = size ; j < usedCols + size; j++) {
+                            decodeMatrix[packetCount][j] = 0;
+                        }
                         throw new LinearDependantException();
 		}                
+
+                /* add the 1 in the inverse matrix */
+                decodeMatrix[packetCount][size+pivot] = 1;
 
 		/* divide the line */		
 
                 if ( decodeMatrix[packetCount][pivot] != 1 ) {
                     int pval = decodeMatrix[packetCount][pivot];
+
+                    /* first half */
                     for (int j = 0 ; j < usedCols ; j++) {
+                            int val = decodeMatrix[packetCount][j];
+                            decodeMatrix[packetCount][j] = div[val][pval];
+                    }
+
+                    /* second half */
+                    for (int j = size ; j < usedCols + size; j++) {
                             int val = decodeMatrix[packetCount][j];
                             decodeMatrix[packetCount][j] = div[val][pval];
                     }
                 }
 		
-		/* zero the column above the pivot */
-		
+		/* zero the column above the pivot */		
 		for ( int i = 0 ; i < packetCount ; i++ ) {
 
 			int m = decodeMatrix[i][pivot];
@@ -140,7 +161,16 @@ public class ArrayDecoder implements Decoder {
 				
 				decodeMatrix[i][j] = sub[val][mul[val2][m]];
 				
-			}			
+			}
+
+                        for (int j = size ; j < size + usedCols ; j++) {
+                                
+                                int val2 = decodeMatrix[packetCount][j];
+				int val = decodeMatrix[i][j];
+
+				decodeMatrix[i][j] = sub[val][mul[val2][m]];
+
+			}
 		}
 
                 packetCount++;
@@ -148,7 +178,8 @@ public class ArrayDecoder implements Decoder {
                 
 		/* look for decodable blocks */
 		
-		HashSet<Integer> willDecode = new HashSet<Integer>();
+		HashMap<Integer,FiniteFieldVector> willDecode =
+                        new HashMap<Integer, FiniteFieldVector>();
 
                 for ( int i = 0; i < packetCount ; i++) {
                     int pos = -1;
@@ -166,12 +197,33 @@ public class ArrayDecoder implements Decoder {
                     
                     if ( pos >= 0) {
                         decoded[i] = true;
-                        willDecode.add(colToBlock[pos]);
+
+                        FiniteFieldVector vector = new SparseFiniteFieldVector();
+
+                        for ( int j = size ; j < size + usedCols ; j++) {
+                            vector.setCoefficient(colToBlock[j-size], decodeMatrix[i][j]);
+                        }
+
+                        willDecode.put(colToBlock[pos], vector);
+                        decCount++;
                     }
                 }
 
-		decodedBlocks.addAll(willDecode);
-		
+
+                for (int i= 0 ; i < size ; i++) {
+                    for (int j = 0 ; j < size ; j++) {
+                        System.out.print(" " + decodeMatrix[i][j]);
+                    }
+                    System.out.print(" | ");
+                    for (int j = size ; j < 2*size ; j++) {
+                        System.out.print(" " + decodeMatrix[i][j]);
+                    }
+
+                    System.out.println();
+                }
+
+                System.out.println("----------------");
+
 		return willDecode;			
 		
 	}
