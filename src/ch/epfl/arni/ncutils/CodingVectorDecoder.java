@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author lokeller
  */
-public interface Decoder {
+public interface CodingVectorDecoder {
 
     Map<Integer, FiniteFieldVector> decode(FiniteFieldVector p) throws LinearDependantException;
 

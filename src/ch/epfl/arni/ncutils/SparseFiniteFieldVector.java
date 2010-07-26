@@ -2,6 +2,7 @@ package ch.epfl.arni.ncutils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public class SparseFiniteFieldVector implements FiniteFieldVector {
 
@@ -53,6 +54,26 @@ public class SparseFiniteFieldVector implements FiniteFieldVector {
 
     public FiniteField getFiniteField() {
         return ff;
+    }
+
+    public void add(FiniteFieldVector vector) {
+        
+        Vector<Integer> coeffs = new Vector<Integer>(coefficients.keySet());
+
+        for ( Integer i : coeffs) {
+            setCoefficient(i, ff.sum[getCoefficient(i)][vector.getCoefficient(i)]);
+        }
+
+    }
+
+    public void scalarMultiply(int c) {
+
+        Vector<Integer> coeffs = new Vector<Integer>(coefficients.keySet());
+
+        for ( Integer i : coeffs) {
+            setCoefficient(i, ff.mul[getCoefficient(i)][c]);
+        }
+
     }
 
 }

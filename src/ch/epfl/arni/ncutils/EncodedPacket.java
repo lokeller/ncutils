@@ -9,7 +9,7 @@ package ch.epfl.arni.ncutils;
  *
  * @author lokeller
  */
-public interface Packet extends FiniteFieldVector {
+public interface EncodedPacket extends FiniteFieldVector {
 
     public FiniteFieldVector getCodingVector();
     public FiniteFieldVector getPayload();

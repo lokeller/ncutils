@@ -5,8 +5,8 @@
 
 package ch.epfl.arni.ncutils.examples;
 
-import ch.epfl.arni.ncutils.ArrayDecoder;
-import ch.epfl.arni.ncutils.Decoder;
+import ch.epfl.arni.ncutils.ArrayBasedCodingVectorDecoder;
+import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.LinearDependantException;
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author lokeller
  */
-public class Example1 {
+public class CodingVectorLevelExample {
 
     public static void main(String[] args) {
 
@@ -57,7 +57,7 @@ public class Example1 {
         }
 
         /* initialize a decoder */
-        Decoder d = new ArrayDecoder(size);
+        CodingVectorDecoder d = new ArrayBasedCodingVectorDecoder(size);
         //Decoder d = new VectorDecoder();
 
         /* store the start time of the decoding */
@@ -85,7 +85,7 @@ public class Example1 {
 
                 /* this exception is thrown if the vector being decoded is
                  linearly dependent from what has been sent previously */
-                Logger.getLogger(Example1.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CodingVectorLevelExample.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 

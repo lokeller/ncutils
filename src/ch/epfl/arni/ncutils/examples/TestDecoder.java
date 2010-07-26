@@ -5,8 +5,8 @@
 
 package ch.epfl.arni.ncutils.examples;
 
-import ch.epfl.arni.ncutils.ArrayDecoder;
-import ch.epfl.arni.ncutils.Decoder;
+import ch.epfl.arni.ncutils.ArrayBasedCodingVectorDecoder;
+import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.LinearDependantException;
@@ -55,26 +55,26 @@ public class TestDecoder {
     public static final void main(String [] args) {
 
         int size = 10;
-        Decoder d = new ArrayDecoder(size);     
+        CodingVectorDecoder d = new ArrayBasedCodingVectorDecoder(size);
         testInstantlyDecodable(size, d);
 
-        d = new ArrayDecoder(size);
+        d = new ArrayBasedCodingVectorDecoder(size);
         testIdentity(size, d);
         
-        d = new ArrayDecoder(size);
+        d = new ArrayBasedCodingVectorDecoder(size);
         testLinearlyDependant(size,d);
 
-        d = new ArrayDecoder(size);
+        d = new ArrayBasedCodingVectorDecoder(size);
         testNonDecodable(size, d);
 
-        d = new ArrayDecoder(size);
+        d = new ArrayBasedCodingVectorDecoder(size);
         testRandomMatrix(size, d);
 
         System.out.println("All tests completed succesfully");
 
     }
 
-    private static void testIdentity(int size, Decoder d) {
+    private static void testIdentity(int size, CodingVectorDecoder d) {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         for (int i = 0; i < size; i++) {
             vectors[i] = new SparseFiniteFieldVector();
@@ -102,7 +102,7 @@ public class TestDecoder {
         checkInverse(vectors, inverse, size);
     }
 
-    private static void testInstantlyDecodable(int size, Decoder d) {
+    private static void testInstantlyDecodable(int size, CodingVectorDecoder d) {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         for (int i = 0; i < size; i++) {
             vectors[i] = new SparseFiniteFieldVector();
@@ -129,7 +129,7 @@ public class TestDecoder {
         checkInverse(vectors, inverse, size);
     }
 
-    private static void testNonDecodable(int size, Decoder d) {
+    private static void testNonDecodable(int size, CodingVectorDecoder d) {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         
         for (int i = 0; i < size; i++) {
@@ -159,7 +159,7 @@ public class TestDecoder {
     }
 
 
-    private static void testLinearlyDependant(int size, Decoder d) {
+    private static void testLinearlyDependant(int size, CodingVectorDecoder d) {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         
         FiniteField f = FiniteField.getDefaultFiniteField();
@@ -190,7 +190,7 @@ public class TestDecoder {
         }
     }
 
-     private static void testRandomMatrix(int size, Decoder d) {
+     private static void testRandomMatrix(int size, CodingVectorDecoder d) {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
 
         FiniteField f = FiniteField.getDefaultFiniteField();

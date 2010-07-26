@@ -15,7 +15,7 @@ import java.util.Map;
  *
  */
 
-public class VectorDecoder implements Decoder {
+public class VectorDecoder implements CodingVectorDecoder {
 		
 	private HashSet<Integer> decodedBlocks = new HashSet<Integer>();
 		

@@ -15,7 +15,7 @@ import java.util.Map;
  *
  */
 
-public class ArrayDecoder implements Decoder {
+public class ArrayBasedCodingVectorDecoder implements CodingVectorDecoder {
 		
 	private int[][] decodeMatrix;
         private int[] colToBlock;
@@ -26,7 +26,7 @@ public class ArrayDecoder implements Decoder {
         private int usedCols = 0;
         private int decCount = 0;
 
-        public ArrayDecoder(int size) {
+        public ArrayBasedCodingVectorDecoder(int size) {
             decodeMatrix = new int[size][size * 2];
             colToBlock = new int[size];
             blockToCol = new int[size];

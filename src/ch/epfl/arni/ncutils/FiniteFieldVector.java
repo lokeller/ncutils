@@ -19,6 +19,10 @@ public interface FiniteFieldVector {
     public int getCoefficient(int index);
     public void copyTo(FiniteFieldVector c);
     public void setToZero();
+
+    public void add(FiniteFieldVector vector);
+    public void scalarMultiply(int c);
+
     public int getHammingWeight();
 
     public Iterable<Integer> getNonZeroCoefficients();
