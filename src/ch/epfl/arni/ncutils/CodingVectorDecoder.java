@@ -23,23 +23,17 @@ public class CodingVectorDecoder {
          */
 	private int[][] decodeMatrix;
         
-        private int[] colToBlock;
-        private int[] blockToCol;
         private int[] pivotPos;
         private boolean[] isPivot;
         private boolean[] decoded;
-        private int usedCols = 0;
         private int packetCount = 0;
         private FiniteField ff;
 
         public CodingVectorDecoder(int maxPackets, FiniteField ff) {
             decodeMatrix = new int[maxPackets][maxPackets * 2];
-            colToBlock = new int[maxPackets];
-            blockToCol = new int[maxPackets];
             pivotPos = new int[maxPackets];
             decoded = new boolean[maxPackets];
             isPivot = new boolean[maxPackets];
-            for (int i = 0; i < maxPackets; i++) blockToCol[i] = -1;
             this.ff = ff;
 
         }
@@ -50,39 +44,26 @@ public class CodingVectorDecoder {
 
 	public Map<Integer,FiniteFieldVector> decode(FiniteFieldVector v) throws LinearDependantException {
                                 		
-                int [][] mul = ff.mul;
-                int [][] sub = ff.sub;
-                int [][] div = ff.div;
+                final int [][] mul = ff.mul;
+                final int [][] sub = ff.sub;
+                final int [][] div = ff.div;
 
-                int size = decodeMatrix.length;
+                final int size = decodeMatrix.length;
+                final  int totalSize = decodeMatrix[0].length;
 
-		boolean linearlyDependant = true;
-
-		/* add the column for the new received Integers */
+                /* add the received packet at the bottom of the matrix */
                 for ( int i = 0 ; i < v.getLength() ; i++) {
+                    decodeMatrix[packetCount][i] = v.getCoordinate(i);
+                    decodeMatrix[packetCount][i+size] = 0 ;                    
+                }
 
-                    int val = v.getCoordinate(i);
-
-                    if ( val == 0 ) continue;
-
-                    int tb = blockToCol[i];
-
-                    if ( tb == -1) {
-                        blockToCol[i] = usedCols;
-                        tb = usedCols;
-                        colToBlock[usedCols] = i;
-                        usedCols++;                        
-                    }
-
-                    decodeMatrix[packetCount][tb] = val;
-
-                    linearlyDependant = false;
-
+                /* put zeros on the inverse matrix but on position packet count*/
+                for ( int i = size ; i < totalSize ; i++) {
+                    decodeMatrix[packetCount][i] = 0 ;
                 }
                 
-                if (linearlyDependant) {
-                    throw new LinearDependantException();
-                }
+                decodeMatrix[packetCount][size+packetCount] = 1;
+
 
 		/* simplify the new packet */
 		
@@ -93,15 +74,7 @@ public class CodingVectorDecoder {
 
                         if (m == 0) continue;
 
-                        /* entries in the first half */
-			for (int j = 0 ; j < usedCols ; j++) {                                
-                                int val = decodeMatrix[packetCount][j];
-				int val2 = decodeMatrix[i][j];
-                                decodeMatrix[packetCount][j] = sub[val][mul[val2][m]];
-			}
-
-                        /* entries in the second half */
-                        for (int j = size ; j < usedCols + size; j++) {
+			for (int j = 0 ; j < totalSize ; j++) {
                                 int val = decodeMatrix[packetCount][j];
 				int val2 = decodeMatrix[i][j];
                                 decodeMatrix[packetCount][j] = sub[val][mul[val2][m]];
@@ -109,10 +82,9 @@ public class CodingVectorDecoder {
 			
 		}
 
-		/* find pivot on the line */
-		
+		/* find pivot on the line */		
 		int pivot = -1;
-		for (int i = 0 ; i < usedCols ; i++) {
+		for (int i = 0 ; i < size ; i++) {
                     if (isPivot[i]) continue;                    
                     if (decodeMatrix[packetCount][i] != 0) {
                             pivotPos[packetCount] = i;
@@ -125,33 +97,20 @@ public class CodingVectorDecoder {
 		/* if the packet is not li stop here */
 		
 		if (pivot == -1 ) {                        
-                    
-                        /* cleanup the second half of the decode matrix */
-                        for (int j = size ; j < usedCols + size; j++) {
-                            decodeMatrix[packetCount][j] = 0;
-                        }
+
                         throw new LinearDependantException();
 		}                
-
-                /* add the 1 in the inverse matrix */
-                decodeMatrix[packetCount][size+packetCount] = 1;
-
+                
 		/* divide the line */		
 
                 if ( decodeMatrix[packetCount][pivot] != 1 ) {
                     int pval = decodeMatrix[packetCount][pivot];
 
-                    /* first half */
-                    for (int j = 0 ; j < usedCols ; j++) {
+                    for (int j = 0 ; j < totalSize ; j++) {
                             int val = decodeMatrix[packetCount][j];
                             decodeMatrix[packetCount][j] = div[val][pval];
                     }
 
-                    /* second half */
-                    for (int j = size ; j < usedCols + size; j++) {
-                            int val = decodeMatrix[packetCount][j];
-                            decodeMatrix[packetCount][j] = div[val][pval];
-                    }
                 }
 		
 		/* zero the column above the pivot */		
@@ -161,7 +120,7 @@ public class CodingVectorDecoder {
 
                         if (m == 0) continue;
 
-			for (int j = 0 ; j < usedCols ; j++) {
+			for (int j = 0 ; j < totalSize ; j++) {
                                 
                                 int val2 = decodeMatrix[packetCount][j];
 				int val = decodeMatrix[i][j];
@@ -170,18 +129,9 @@ public class CodingVectorDecoder {
 				
 			}
 
-                        for (int j = size ; j < size + usedCols ; j++) {
-                                
-                                int val2 = decodeMatrix[packetCount][j];
-				int val = decodeMatrix[i][j];
-
-				decodeMatrix[i][j] = sub[val][mul[val2][m]];
-
-			}
 		}
 
                 packetCount++;
-
                 
 		/* look for decodable blocks */
 		
@@ -194,7 +144,7 @@ public class CodingVectorDecoder {
                     /* skip if the line is marked decoded */
                     if (decoded[i]) continue;
 
-                    for ( int j = 0 ; j < usedCols ; j++) {
+                    for ( int j = 0 ; j < size ; j++) {
 
                         if (decodeMatrix[i][j] != 0 && pos != -1) {
                             pos = -1;
@@ -208,11 +158,11 @@ public class CodingVectorDecoder {
 
                         /* build the vector that explains how to obtain the block */
                         FiniteFieldVector vector = new FiniteFieldVector(decodeMatrix.length, ff);
-                        for ( int j = size ; j < size + usedCols ; j++) {
+                        for ( int j = size ; j < size + size ; j++) {
                             vector.setCoordinate(j-size, decodeMatrix[i][j]);
                         }
 
-                        willDecode.put(colToBlock[pos], vector);
+                        willDecode.put(pos, vector);
 
                     }
                 }

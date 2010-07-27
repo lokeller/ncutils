@@ -32,7 +32,7 @@ public class CodingVectorLevelExample {
         /**
          * This is the number of different blocks that are being sent
          */
-        int size = 10;
+        int size = 500;
 
         /*
          * Creates as many linearly independent vectors as possible
@@ -86,6 +86,7 @@ public class CodingVectorLevelExample {
             }
         }
 
+        /*
         for (int i= 0 ; i < size ; i++) {
             for (int j = 0 ; j < size ; j++) {
                 System.out.print(" " + inverse[i].getCoordinate(j));
@@ -95,7 +96,7 @@ public class CodingVectorLevelExample {
         }
 
         System.out.println("-----------------");
-
+*/
         for (int i= 0 ; i < size ; i++) {
             for (int j = 0 ; j < size ; j++) {
 
@@ -104,12 +105,12 @@ public class CodingVectorLevelExample {
                     sum = ff.sum[sum][ff.mul[vectors[i].getCoordinate(k)][inverse[k].getCoordinate(j)]];
                 }
 
-                System.out.print(" " + sum);
+  //              System.out.print(" " + sum);
 
                 if (i == j && sum != 1) throw new RuntimeException();
                 if (i != j && sum != 0) throw new RuntimeException();
             }
-             System.out.println();
+    //         System.out.println();
         }
 
         System.out.println("Total decoding time :" + (System.currentTimeMillis() - m));
