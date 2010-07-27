@@ -52,7 +52,7 @@ public class CodingVectorDecoderTest {
 
                 int sum = 0;
                 for (int k = 0 ; k < size ; k++) {
-                    sum = ff.sum[sum][ff.mul[vectors[i].getCoefficient(k)][inverse[k].getCoefficient(j)]];
+                    sum = ff.sum[sum][ff.mul[vectors[i].getCoordinate(k)][inverse[k].getCoordinate(j)]];
                 }
 
                 assertFalse(i == j && sum != 1);
@@ -75,7 +75,7 @@ public class CodingVectorDecoderTest {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         for (int i = 0; i < size; i++) {
             vectors[i] = new FiniteFieldVector(size, ff);
-            vectors[i].setCoefficient(i, 1);
+            vectors[i].setCoordinate(i, 1);
         }
 
         FiniteFieldVector[] inverse = new FiniteFieldVector[size];
@@ -105,7 +105,7 @@ public class CodingVectorDecoderTest {
         for (int i = 0; i < size; i++) {
             vectors[i] = new FiniteFieldVector(size, ff);
             for ( int j = 0 ; j <= i ; j++) {
-                vectors[i].setCoefficient(j, 1);
+                vectors[i].setCoordinate(j, 1);
             }
         }
 
@@ -135,8 +135,8 @@ public class CodingVectorDecoderTest {
 
         for (int i = 0; i < size; i++) {
             vectors[i] = new FiniteFieldVector(size, ff);
-            vectors[i].setCoefficient(i, 1);
-            vectors[i].setCoefficient(size-1, 1);
+            vectors[i].setCoordinate(i, 1);
+            vectors[i].setCoordinate(size-1, 1);
         }
 
         FiniteFieldVector[] inverse = new FiniteFieldVector[size];
@@ -168,7 +168,7 @@ public class CodingVectorDecoderTest {
 
         vectors[0] = new FiniteFieldVector(size, ff);
         for (int i = 1; i < size; i++) {
-            vectors[0].setCoefficient(i, r.nextInt(ff.getCardinality()));
+            vectors[0].setCoordinate(i, r.nextInt(ff.getCardinality()));
         }
 
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
@@ -178,8 +178,8 @@ public class CodingVectorDecoderTest {
 
             int x = r.nextInt(ff.getCardinality());
             for (int j = 1; j < size; j++) {
-                int p = vectors[0].getCoefficient(j);
-                vectors[i].setCoefficient(j, ff.mul[x][p]);
+                int p = vectors[0].getCoordinate(j);
+                vectors[i].setCoordinate(j, ff.mul[x][p]);
             }
 
         }
@@ -203,7 +203,7 @@ public class CodingVectorDecoderTest {
 
             for (int j = 0; j < size; j++) {
                 int x = r.nextInt(ff.getCardinality());
-                vectors[i].setCoefficient(j, x);
+                vectors[i].setCoordinate(j, x);
             }
 
         }

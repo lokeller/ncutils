@@ -124,21 +124,21 @@ public class FiniteField {
 
     public FiniteFieldVector byteToVector(byte [] bytes) {
 
-       FiniteFieldVector output = new FiniteFieldVector(coefficientCount(bytes.length), this);
+       FiniteFieldVector output = new FiniteFieldVector(coordinatesCount(bytes.length), this);
 
        switch (Q) {
             case 256:
 
                 for (int i = 0 ; i < bytes.length; i++) {
-                    output.setCoefficient(i, 0xFF & ((int) bytes[i]));
+                    output.setCoordinate(i, 0xFF & ((int) bytes[i]));
                 }
 
                 return output ;
             case 16:
 
                 for (int i = 0 ; i < bytes.length; i++) {
-                    output.setCoefficient(2*i, 0x0F & ((int) bytes[i]));
-                    output.setCoefficient(2*i+1, (0xF0 & ((int) bytes[i])) >> 4);
+                    output.setCoordinate(2*i, 0x0F & ((int) bytes[i]));
+                    output.setCoordinate(2*i+1, (0xF0 & ((int) bytes[i])) >> 4);
                 }
                 
                 return output ;
@@ -158,7 +158,7 @@ public class FiniteField {
             case 256:
 
                 for (int i = 0 ; i < output.length; i++) {
-                    output[i] = (byte) vector.getCoefficient(i);
+                    output[i] = (byte) vector.getCoordinate(i);
                 }
 
                 return output;
@@ -166,7 +166,7 @@ public class FiniteField {
             case 16:
 
                 for (int i = 0 ; i < output.length; i++) {
-                    output[i] = (byte) ( (vector.getCoefficient(2*i+1) << 4) + vector.getCoefficient(2*i )) ;
+                    output[i] = (byte) ( (vector.getCoordinate(2*i+1) << 4) + vector.getCoordinate(2*i )) ;
                 }
                 
                 return output;
@@ -176,23 +176,23 @@ public class FiniteField {
         }
     }
 
-    public int bytesLength(int coefficientsCount) {
+    public int bytesLength(int coordinatesCount) {
 
          switch (Q) {
             case 256:
 
-                return coefficientsCount;
+                return coordinatesCount;
 
             case 16:
 
-                return (coefficientsCount + 1) / 2;
+                return (coordinatesCount + 1) / 2;
 
             default:
                 throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
         }
     }
 
-    public int coefficientCount(int bytesLength) {
+    public int coordinatesCount(int bytesLength) {
          switch (Q) {
             case 256:
 

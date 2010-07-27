@@ -20,21 +20,21 @@ public class PacketDecoder {
 
     private CodingVectorDecoder codingVectorDecoder;
 
-    private int payloadCoefficientsCount;
+    private int payloadCoordinatesCount;
 
     private FiniteField ff;
 
-    public PacketDecoder(FiniteField field, int maxPackets, int payloadCoefficientsCount) {
+    public PacketDecoder(FiniteField field, int maxPackets, int payloadCoordinatesCount) {
         this.ff = field;
         codingVectorDecoder = new CodingVectorDecoder(maxPackets,ff);
-        this.payloadCoefficientsCount = payloadCoefficientsCount;
+        this.payloadCoordinatesCount = payloadCoordinatesCount;
     }
     
     public Vector<UncodedPacket> decode(CodedPacket p) {
 
         assert(p.getFiniteField() == ff);
         assert(p.getCodingVector().getLength() == codingVectorDecoder.getMaxPackets());
-        assert(p.getPayload().getLength() == payloadCoefficientsCount);
+        assert(p.getPayload().getLength() == payloadCoordinatesCount);
         
         try {
 
@@ -68,14 +68,14 @@ public class PacketDecoder {
         
         /* this vector will store the linear combination of coded payloads that
            correspond to the decoded payload */
-        FiniteFieldVector decodedPayload = new FiniteFieldVector(payloadCoefficientsCount, ff);
+        FiniteFieldVector decodedPayload = new FiniteFieldVector(payloadCoordinatesCount, ff);
 
         /* linearly combine the payloads */
         for (int codedPacketId = 0; codedPacketId < encoding.getLength(); codedPacketId++) {
 
-            int coeff = encoding.getCoefficient(codedPacketId);
+            int coeff = encoding.getCoordinate(codedPacketId);
 
-            /* skip the packet if the coefficient is zero */
+            /* skip the packet if the coordinate is zero */
             if (coeff == 0) {
                 continue;
             }
@@ -84,10 +84,10 @@ public class PacketDecoder {
 
             /* linearly combine the payload of packet "codedPacketId" */
             for (int c = 0; c < codedPayload.getLength(); c++) {
-                int v2 = codedPayload.getCoefficient(c);                
-                int v1 = decodedPayload.getCoefficient(c);
+                int v2 = codedPayload.getCoordinate(c);
+                int v1 = decodedPayload.getCoordinate(c);
                 int val = ff.sum[v1][ff.mul[coeff][v2]];
-                decodedPayload.setCoefficient(c, val);
+                decodedPayload.setCoordinate(c, val);
             }
         }
         return decodedPayload;

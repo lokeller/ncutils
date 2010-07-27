@@ -47,12 +47,12 @@ public class FiniteFieldVectorTest {
         FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 1);
+            instance.setCoordinate(i, 1);
         }
         instance.setToZero();
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance.getCoefficient(i) == 0);
+            assertTrue(instance.getCoordinate(i) == 0);
         }
         
     }
@@ -63,25 +63,25 @@ public class FiniteFieldVectorTest {
         
 
         for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 1);
+            instance.setCoordinate(i, 1);
         }
 
         FiniteFieldVector instance2 = instance.copy();
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance.getCoefficient(i) == 1);
+            assertTrue(instance2.getCoordinate(i) == 1);
         }
        
     }
 
     @Test
-    public void testSetGetCoefficient() {
+    public void testSetGetCoordinates() {
         FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int j = 0 ; j < 10; j++) {
             for (int i = 0 ; i < instance.getFiniteField().getCardinality(); i++) {
-                instance.setCoefficient(j, i);
-                assertTrue(instance.getCoefficient(j) == i);
+                instance.setCoordinate(j, i);
+                assertTrue(instance.getCoordinate(j) == i);
             }
         }
 
@@ -104,14 +104,14 @@ public class FiniteFieldVectorTest {
         FiniteFieldVector instance2 = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 1);
-            instance2.setCoefficient(i, 7);
+            instance.setCoordinate(i, 1);
+            instance2.setCoordinate(i, 7);
         }
 
         FiniteFieldVector instance3 = instance.add(instance2);
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance3.getCoefficient(i) == instance.getFiniteField().sum[1][7]);
+            assertTrue(instance3.getCoordinate(i) == instance.getFiniteField().sum[1][7]);
         }
 
     }
@@ -122,13 +122,13 @@ public class FiniteFieldVectorTest {
         FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 3);
+            instance.setCoordinate(i, 3);
         }
 
         FiniteFieldVector instance2 = instance.scalarMultiply(3);
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance2.getCoefficient(i) == instance.getFiniteField().mul[3][3]);
+            assertTrue(instance2.getCoordinate(i) == instance.getFiniteField().mul[3][3]);
         }
 
     }

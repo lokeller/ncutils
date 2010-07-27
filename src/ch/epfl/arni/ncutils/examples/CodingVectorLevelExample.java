@@ -47,9 +47,8 @@ public class CodingVectorLevelExample {
             vectors[i] = new FiniteFieldVector(size, ff);
 
             for (int j = 0; j < size ; j++) {
-                vectors[i].setCoefficient(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));
-            }            
-            //vectors[i].setCoefficient(size-i-1,1);
+                vectors[i].setCoordinate(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));
+            }                        
             
 
         }
@@ -89,7 +88,7 @@ public class CodingVectorLevelExample {
 
         for (int i= 0 ; i < size ; i++) {
             for (int j = 0 ; j < size ; j++) {
-                System.out.print(" " + inverse[i].getCoefficient(j));
+                System.out.print(" " + inverse[i].getCoordinate(j));
             }
 
             System.out.println();
@@ -102,7 +101,7 @@ public class CodingVectorLevelExample {
 
                 int sum = 0;
                 for (int k = 0 ; k < size ; k++) {
-                    sum = ff.sum[sum][ff.mul[vectors[i].getCoefficient(k)][inverse[k].getCoefficient(j)]];
+                    sum = ff.sum[sum][ff.mul[vectors[i].getCoordinate(k)][inverse[k].getCoordinate(j)]];
                 }
 
                 System.out.print(" " + sum);

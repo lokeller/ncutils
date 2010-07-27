@@ -3,10 +3,26 @@ package ch.epfl.arni.ncutils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class implements matrix inversion over finite fields. The algorithm used
+ * is a modification of the standard Gaussian-Jordan elimination. The class
+ * accepts the matrix that has to be inverted line by line. As soon some lines
+ * of the inverted matrix are available they are outputted.
+ *
+ * Internally the class uses stores two matrices. It uses therefore O(N²) memory.
+ *
+ * @author lokeller
+ */
+
 
 public class CodingVectorDecoder {
-		
+
+        /* the matrix used for gaussian jordan elimination, the first half of the
+         * columns store the matrix being inverted the second half the inverted
+         * matrix.
+         */
 	private int[][] decodeMatrix;
+        
         private int[] colToBlock;
         private int[] blockToCol;
         private int[] pivotPos;
@@ -45,7 +61,7 @@ public class CodingVectorDecoder {
 		/* add the column for the new received Integers */
                 for ( int i = 0 ; i < v.getLength() ; i++) {
 
-                    int val = v.getCoefficient(i);
+                    int val = v.getCoordinate(i);
 
                     if ( val == 0 ) continue;
 
@@ -193,7 +209,7 @@ public class CodingVectorDecoder {
                         /* build the vector that explains how to obtain the block */
                         FiniteFieldVector vector = new FiniteFieldVector(decodeMatrix.length, ff);
                         for ( int j = size ; j < size + usedCols ; j++) {
-                            vector.setCoefficient(j-size, decodeMatrix[i][j]);
+                            vector.setCoordinate(j-size, decodeMatrix[i][j]);
                         }
 
                         willDecode.put(colToBlock[pos], vector);

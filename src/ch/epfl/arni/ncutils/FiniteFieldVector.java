@@ -4,16 +4,16 @@ import java.util.Arrays;
 
 public class FiniteFieldVector {
 
-    private int[] coefficients;
+    private int[] coordinates;
     private FiniteField ff ;
 
     public FiniteFieldVector(int length, FiniteField ff) {
         this.ff = ff;
-        coefficients = new int[length];
+        coordinates = new int[length];
     }
 
     public int getLength() {
-        return coefficients.length;
+        return coordinates.length;
     }
 
     public FiniteField getFiniteField() {
@@ -21,29 +21,29 @@ public class FiniteFieldVector {
     }
 
 
-    public void setCoefficient(int index, int value) {
+    public void setCoordinate(int index, int value) {
         assert(index >= 0);
 
         assert(value < ff.getCardinality() && value >= 0);
 
-        coefficients[index] = value;
+        coordinates[index] = value;
     }
 
-    public int getCoefficient(int index) {
+    public int getCoordinate(int index) {
         assert(index >= 0);
         
-        return coefficients[index];
+        return coordinates[index];
         
     }
 
     public void setToZero() {
-        Arrays.fill(coefficients, 0);
+        Arrays.fill(coordinates, 0);
     }
 
     public FiniteFieldVector copy() {
 
-        FiniteFieldVector vector = new FiniteFieldVector(coefficients.length, ff);
-        System.arraycopy(coefficients, 0, vector.coefficients, 0, coefficients.length);
+        FiniteFieldVector vector = new FiniteFieldVector(coordinates.length, ff);
+        System.arraycopy(coordinates, 0, vector.coordinates, 0, coordinates.length);
 
         return vector;
     }
@@ -51,12 +51,12 @@ public class FiniteFieldVector {
     public FiniteFieldVector add(FiniteFieldVector vector) {
 
         assert(vector.getFiniteField() == ff);
-        assert(vector.coefficients.length == coefficients.length);
+        assert(vector.coordinates.length == coordinates.length);
 
         FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
 
-        for ( int i = 0 ; i < coefficients.length ; i++ ) {
-            out.coefficients[i] = ff.sum[coefficients[i]][vector.coefficients[i]];
+        for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            out.coordinates[i] = ff.sum[coordinates[i]][vector.coordinates[i]];
         }
 
         return out;
@@ -68,8 +68,8 @@ public class FiniteFieldVector {
 
         FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
 
-        for ( int i = 0 ; i < coefficients.length ; i++ ) {
-            out.coefficients[i] = ff.mul[coefficients[i]][c];
+        for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            out.coordinates[i] = ff.mul[coordinates[i]][c];
         }
 
         return out;
@@ -79,7 +79,7 @@ public class FiniteFieldVector {
     @Override
     public String toString() {
             String ret = "";
-            for (int c : coefficients) {
+            for (int c : coordinates) {
                     ret += (ret.length() != 0 ? " " : "") + String.format("%02d ", c); ;
             }
             return ret;
