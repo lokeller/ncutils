@@ -1,22 +1,8 @@
 package ch.epfl.arni.ncutils;
 
-import ch.epfl.arni.ncutils.CodingVectorDecoder;
-import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.FiniteFieldVector;
-import ch.epfl.arni.ncutils.LinearDependantException;
-import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * 
- * This class is implemented with Vectors, implementing it with LinkedList is slower 
- * ( 2.5x slower) 
- * 
- * @author lokeller
- *
- */
 
 public class CodingVectorDecoder {
 		
@@ -27,29 +13,26 @@ public class CodingVectorDecoder {
         private boolean[] isPivot;
         private boolean[] decoded;
         private int usedCols = 0;
-        private int decCount = 0;
+        private int packetCount = 0;
+        private FiniteField ff;
 
-        public CodingVectorDecoder(int size, FiniteField ff) {
-            decodeMatrix = new int[size][size * 2];
-            colToBlock = new int[size];
-            blockToCol = new int[size];
-            pivotPos = new int[size];
-            decoded = new boolean[size];
-            isPivot = new boolean[size];
-            for (int i = 0; i < size; i++) blockToCol[i] = -1;
+        public CodingVectorDecoder(int maxPackets, FiniteField ff) {
+            decodeMatrix = new int[maxPackets][maxPackets * 2];
+            colToBlock = new int[maxPackets];
+            blockToCol = new int[maxPackets];
+            pivotPos = new int[maxPackets];
+            decoded = new boolean[maxPackets];
+            isPivot = new boolean[maxPackets];
+            for (int i = 0; i < maxPackets; i++) blockToCol[i] = -1;
             this.ff = ff;
 
         }
 
-	private int packetCount = 0;
-
-        private FiniteField ff;
-
-        public int decodedBlockCount() {
-            return decCount;
+        public int getMaxPackets() {
+            return decodeMatrix.length;
         }
 
-	public Map<Integer,FiniteFieldVector> decode(FiniteFieldVector p) throws LinearDependantException {
+	public Map<Integer,FiniteFieldVector> decode(FiniteFieldVector v) throws LinearDependantException {
                                 		
                 int [][] mul = ff.mul;
                 int [][] sub = ff.sub;
@@ -60,18 +43,22 @@ public class CodingVectorDecoder {
 		boolean linearlyDependant = true;
 
 		/* add the column for the new received Integers */
-                for ( Integer b : p.getNonZeroCoefficients()) {
+                for ( int i = 0 ; i < v.getLength() ; i++) {
 
-                    int tb = blockToCol[b];
+                    int val = v.getCoefficient(i);
+
+                    if ( val == 0 ) continue;
+
+                    int tb = blockToCol[i];
 
                     if ( tb == -1) {
-                        blockToCol[b] = usedCols;
+                        blockToCol[i] = usedCols;
                         tb = usedCols;
-                        colToBlock[usedCols] = b;
+                        colToBlock[usedCols] = i;
                         usedCols++;                        
                     }
 
-                    decodeMatrix[packetCount][tb] = p.getCoefficient(b);
+                    decodeMatrix[packetCount][tb] = val;
 
                     linearlyDependant = false;
 
@@ -202,14 +189,15 @@ public class CodingVectorDecoder {
                     if ( pos >= 0) {
                         decoded[i] = true;
 
-                        FiniteFieldVector vector = new SparseFiniteFieldVector(ff);
 
+                        /* build the vector that explains how to obtain the block */
+                        FiniteFieldVector vector = new FiniteFieldVector(decodeMatrix.length, ff);
                         for ( int j = size ; j < size + usedCols ; j++) {
                             vector.setCoefficient(j-size, decodeMatrix[i][j]);
                         }
 
                         willDecode.put(colToBlock[pos], vector);
-                        decCount++;
+
                     }
                 }
 
@@ -217,8 +205,6 @@ public class CodingVectorDecoder {
 		
 	}
 
-    public int getCodingCoefficientsCount() {
-        return decodeMatrix.length;
-    }
+    
 		
 }

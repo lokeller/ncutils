@@ -5,62 +5,32 @@
 
 package ch.epfl.arni.ncutils;
 
-import ch.epfl.arni.ncutils.impl.DenseFiniteFieldVector;
-import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
-
-import java.util.Vector;
-
 /**
  *
  * @author lokeller
  */
 public class CodedPacket {
-
-
-    private int codingCoefficientsCount;
-    private int payloadLength;
+    
     private FiniteFieldVector codingVector;
     private FiniteFieldVector payloadVector;
 
-    public CodedPacket(int blockCount, UncodedPacket packet, FiniteField ff) {
+    public CodedPacket( UncodedPacket packet, int maxPackets, FiniteField ff) {
 
-        this(blockCount, packet.getPayload().length, ff);
+        this( new FiniteFieldVector(maxPackets, ff), ff.byteToVector(packet.getPayload()));
 
         codingVector.setCoefficient(packet.getId(), 1);
-
-        if ( payloadVector.getFiniteField().getCardinality() != 256 &&
-               payloadVector.getFiniteField().getCardinality() != 16 ) {
-            throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was "
-                                            +payloadVector.getFiniteField().getCardinality() );
-        }
-
-        if (payloadVector.getFiniteField().getCardinality() == 256) {
-            for (int i = 0 ; i < packet.getPayload().length; i++) {
-                this.payloadVector.setCoefficient(i, 0xFF & ((int) packet.getPayload()[i]));
-            }
-        } else if (payloadVector.getFiniteField().getCardinality() == 16) {
-            for (int i = 0 ; i < packet.getPayload().length; i++) {
-                this.payloadVector.setCoefficient(2*i, 0x0F & ((int) packet.getPayload()[i]));
-                this.payloadVector.setCoefficient(2*i+1, (0xF0 & ((int) packet.getPayload()[i])) >> 4);
-            }
-        }
-
-
     }
 
-    public CodedPacket(int blockCount, int payloadLen, FiniteField ff) {
-        assert(blockCount >= 0);
-        this.codingCoefficientsCount = blockCount;
-        this.payloadLength = payloadLen;
+    public CodedPacket(int maxPackets, int payloadByteLen, FiniteField ff) {
 
-        codingVector = new SparseFiniteFieldVector(ff);
-        if (ff.getCardinality() == 16) {
-            payloadVector = new DenseFiniteFieldVector(payloadLen * 2, ff);
-        } else if (ff.getCardinality() == 256) {
-            payloadVector = new DenseFiniteFieldVector(payloadLen, ff);
-        } else {
-            payloadVector = new SparseFiniteFieldVector(ff);
-        }
+        this( new FiniteFieldVector(maxPackets, ff),
+                new FiniteFieldVector(ff.coefficientCount(payloadByteLen), ff));
+        
+    }
+
+    private CodedPacket(FiniteFieldVector codingVector, FiniteFieldVector payloadVector) {
+        this.codingVector = codingVector;
+        this.payloadVector = payloadVector;
     }
 
 
@@ -80,10 +50,10 @@ public class CodedPacket {
     public void setCoefficient(int index, int value) {
         assert( index >= 0);
         assert(value < getFiniteField().getCardinality() && value >= 0);
-        if ( index < codingCoefficientsCount) {
+        if ( index < codingVector.getLength()) {
             codingVector.setCoefficient(index, value);
         } else {
-            payloadVector.setCoefficient(index - codingCoefficientsCount, value);
+            payloadVector.setCoefficient(index - codingVector.getLength(), value);
         }
     }
 
@@ -91,23 +61,19 @@ public class CodedPacket {
 
         assert(index >= 0);
 
-        if ( index < codingCoefficientsCount) {
+        if ( index < codingVector.getLength()) {
             return codingVector.getCoefficient(index);
         } else {
-            return payloadVector.getCoefficient(index - codingCoefficientsCount);
+            return payloadVector.getCoefficient(index - codingVector.getLength());
         }
     }
 
-    public void copyTo(FiniteFieldVector c) {
+    public CodedPacket copy(CodedPacket c) {
 
         assert(c.getFiniteField() == getFiniteField());
 
-        c.setToZero();
-
-        for ( Integer i : getNonZeroCoefficients()) {
-            c.setCoefficient(i, getCoefficient(i));
-        }
-
+        return new CodedPacket(codingVector.copy(), payloadVector.copy());
+        
     }
 
     public void setToZero() {
@@ -115,52 +81,28 @@ public class CodedPacket {
         payloadVector.setToZero();
     }
 
-    public int getHammingWeight() {
-        return payloadVector.getHammingWeight() + codingVector.getHammingWeight();
-    }
-
-    public Iterable<Integer> getNonZeroCoefficients() {
-        Vector<Integer> out = new Vector<Integer>();
-
-        for( Integer i : codingVector.getNonZeroCoefficients()) {
-            out.add(i);
-        }
-
-        for( Integer i : payloadVector.getNonZeroCoefficients()) {
-            out.add(i+codingCoefficientsCount);
-        }
-
-        return out;
-    }
-
-    public int getCodingCoefficientsCount() {
-        return codingCoefficientsCount;
-    }
-
-    public void add(FiniteFieldVector vector) {
+    public CodedPacket add(CodedPacket vector) {
         assert(vector.getFiniteField() == getFiniteField());
-        
-        FiniteField ff = vector.getFiniteField();
 
-        for ( Integer i : vector.getNonZeroCoefficients()) {
-            setCoefficient(i, ff.sum[getCoefficient(i)][vector.getCoefficient(i)]);
-        }
+        return new CodedPacket(codingVector.add(vector.codingVector), payloadVector.add(vector.payloadVector));
 
     }
 
-    public void scalarMultiply(int c) {
+    public CodedPacket scalarMultiply(int c) {
         assert(c < getFiniteField().getCardinality() && c >= 0);
-        payloadVector.scalarMultiply(c);
-        codingVector.scalarMultiply(c);
+
+        return new CodedPacket(codingVector.scalarMultiply(c), payloadVector.scalarMultiply(c));
+        
     }
 
-    public int getPayloadLength() {
-        return payloadLength;
+    @Override
+    public String toString() {
+        
+        return codingVector.toString() + " | " + payloadVector.toString();
+
     }
 
-    public int getLength() {
-        return codingCoefficientsCount + payloadLength;
-    }
+
 
 
 }

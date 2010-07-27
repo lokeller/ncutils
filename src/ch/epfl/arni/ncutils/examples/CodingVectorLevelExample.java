@@ -6,14 +6,11 @@
 package ch.epfl.arni.ncutils.examples;
 
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
-import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.LinearDependantException;
-import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import java.util.Map;
 import java.util.Random;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +44,7 @@ public class CodingVectorLevelExample {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
 
             for (int j = 0; j < size ; j++) {
                 vectors[i].setCoefficient(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));

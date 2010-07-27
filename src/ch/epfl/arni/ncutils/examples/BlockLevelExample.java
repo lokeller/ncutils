@@ -10,7 +10,6 @@ import ch.epfl.arni.ncutils.CodedPacket;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.PacketDecoder;
-import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import ch.epfl.arni.ncutils.UncodedPacket;
 import java.util.Arrays;
 import java.util.Random;
@@ -45,7 +44,7 @@ public class BlockLevelExample {
         CodedPacket[] codewords = new CodedPacket[blockNumber];
 
         for ( int i = 0 ; i < blockNumber ; i++) {
-            codewords[i] = new CodedPacket(blockNumber, inputPackets[i], ff);
+            codewords[i] = new CodedPacket( inputPackets[i], blockNumber, ff);
         }
 
         System.out.println(" Codewords: ");
@@ -59,18 +58,14 @@ public class BlockLevelExample {
 
         Random r = new Random(2131231);
 
-        FiniteFieldVector copy = new SparseFiniteFieldVector(ff);
-
         for ( int i = 0 ; i < blockNumber ; i++) {
 
             networkOutput[i] = new CodedPacket(blockNumber, payloadLen, ff);
 
             for ( int j = 0 ; j < blockNumber ; j++) {
-                int x = r.nextInt(ff.getCardinality());
-                copy.setToZero();
-                codewords[j].copyTo(copy);
-                copy.scalarMultiply(x);
-                networkOutput[i].add(copy);
+                int x = r.nextInt(ff.getCardinality());                
+                CodedPacket copy = codewords[j].scalarMultiply(x);
+                networkOutput[i] = networkOutput[i].add(copy);
                 
             }
         }
@@ -79,7 +74,7 @@ public class BlockLevelExample {
         printCodedPackets(Arrays.asList(networkOutput), payloadLenCoeffs);
 
         /* decode the received packets */
-        PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLen);
+        PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLenCoeffs);
 
         System.out.println(" Decoded packets: ");
         for ( int i = 0; i < blockNumber ; i++) {
@@ -90,26 +85,14 @@ public class BlockLevelExample {
     }
 
     private static void printUncodedPackets(Iterable<UncodedPacket> packets, int payloadLen) {
-        for (UncodedPacket p : packets) {
-            System.out.print("Id: " + p.getId());
-            System.out.print(" Payload: ");
-            for (int k = 0; k < payloadLen; k++) {
-                System.out.print(String.format("%02X ", p.getPayload()[k]));
-            }
-            System.out.println("");
+        for (UncodedPacket p : packets) {            
+            System.out.println(p);
         }
     }
 
     private static void printCodedPackets(Iterable<CodedPacket> packets, int payloadLen) {
         for (CodedPacket p : packets) {
-            for (int k = 0; k < p.getCodingCoefficientsCount(); k++) {
-                System.out.print(" " + p.getCodingVector().getCoefficient(k));
-            }
-            System.out.print( " |");
-            for (int k = 0; k < payloadLen; k++) {
-                System.out.print(" " + p.getPayload().getCoefficient(k));
-            }
-            System.out.println("");
+            System.out.println(p);
         }
     }
 

@@ -23,9 +23,9 @@ import static org.junit.Assert.*;
  *
  * @author lokeller
  */
-public class ArrayBasedCodingVectorDecoderTest {
+public class CodingVectorDecoderTest {
 
-    public ArrayBasedCodingVectorDecoderTest() {
+    public CodingVectorDecoderTest() {
     }
 
     @BeforeClass
@@ -74,7 +74,7 @@ public class ArrayBasedCodingVectorDecoderTest {
 
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
             vectors[i].setCoefficient(i, 1);
         }
 
@@ -103,7 +103,7 @@ public class ArrayBasedCodingVectorDecoderTest {
     public void testInstantlyDecodable() {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
             for ( int j = 0 ; j <= i ; j++) {
                 vectors[i].setCoefficient(j, 1);
             }
@@ -134,7 +134,7 @@ public class ArrayBasedCodingVectorDecoderTest {
         FiniteFieldVector[] vectors = new FiniteFieldVector[size];
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
             vectors[i].setCoefficient(i, 1);
             vectors[i].setCoefficient(size-1, 1);
         }
@@ -166,7 +166,7 @@ public class ArrayBasedCodingVectorDecoderTest {
 
         Random r = new Random(2131231);
 
-        vectors[0] = new SparseFiniteFieldVector(ff);
+        vectors[0] = new FiniteFieldVector(size, ff);
         for (int i = 1; i < size; i++) {
             vectors[0].setCoefficient(i, r.nextInt(ff.getCardinality()));
         }
@@ -174,7 +174,7 @@ public class ArrayBasedCodingVectorDecoderTest {
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
         for (int i = 1; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
 
             int x = r.nextInt(ff.getCardinality());
             for (int j = 1; j < size; j++) {
@@ -199,7 +199,7 @@ public class ArrayBasedCodingVectorDecoderTest {
         Random r = new Random(2131231);
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new SparseFiniteFieldVector(ff);
+            vectors[i] = new FiniteFieldVector(size, ff);
 
             for (int j = 0; j < size; j++) {
                 int x = r.nextInt(ff.getCardinality());

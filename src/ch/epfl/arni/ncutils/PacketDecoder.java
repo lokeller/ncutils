@@ -5,8 +5,8 @@
 
 package ch.epfl.arni.ncutils;
 
-import ch.epfl.arni.ncutils.impl.SparseFiniteFieldVector;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 
@@ -20,56 +20,40 @@ public class PacketDecoder {
 
     private CodingVectorDecoder codingVectorDecoder;
 
-    private int payloadLen;
+    private int payloadCoefficientsCount;
 
     private FiniteField ff;
 
-    public PacketDecoder(FiniteField field, int blockCount, int payloadLen) {
+    public PacketDecoder(FiniteField field, int maxPackets, int payloadCoefficientsCount) {
         this.ff = field;
-        codingVectorDecoder = new CodingVectorDecoder(blockCount,ff);
-        this.payloadLen = payloadLen;
+        codingVectorDecoder = new CodingVectorDecoder(maxPackets,ff);
+        this.payloadCoefficientsCount = payloadCoefficientsCount;
     }
     
     public Vector<UncodedPacket> decode(CodedPacket p) {
 
         assert(p.getFiniteField() == ff);
-        assert(p.getCodingCoefficientsCount() == codingVectorDecoder.getCodingCoefficientsCount());
+        assert(p.getCodingVector().getLength() == codingVectorDecoder.getMaxPackets());
+        assert(p.getPayload().getLength() == payloadCoefficientsCount);
         
         try {
 
             Map<Integer, FiniteFieldVector> decoded = codingVectorDecoder.decode(p.getCodingVector());
             
-            /* add the current packet only if it was linearly independant */
+            /* add the current packet only if it was linearly independant, this
+             will be used to decode future packets*/
             packets.add(p);
 
+            /* decode the new packets that can be decoded */
             Vector<UncodedPacket> output = new Vector<UncodedPacket>();
             
             for ( Map.Entry<Integer, FiniteFieldVector> entry : decoded.entrySet() ) {
 
-                FiniteFieldVector decodedPayload = new SparseFiniteFieldVector(ff);
+                FiniteFieldVector decodedPayload = decodePayload(entry.getValue());
 
-                for ( Integer codedPacketId : entry.getValue().getNonZeroCoefficients()) {
-
-                    FiniteFieldVector codedPayload = packets.get(codedPacketId).getPayload();
-
-                    int coeff = entry.getValue().getCoefficient(codedPacketId);
-
-                    for ( Integer c : codedPayload.getNonZeroCoefficients()) {
-
-                        int v1 = decodedPayload.getCoefficient(c);
-                        int v2 = codedPayload.getCoefficient(c);
-
-                        int val = ff.sum[v1][ff.mul[coeff][v2]];
-
-                        decodedPayload.setCoefficient(c, val);
-                    }
-
-                }
-
-                output.add(new UncodedPacket((int) entry.getKey(), decodedPayload, payloadLen));
+                output.add(new UncodedPacket((int) entry.getKey(), decodedPayload));
 
             }
-
 
             return output;
 
@@ -78,6 +62,35 @@ public class PacketDecoder {
             return new Vector<UncodedPacket>();
         }
         
+    }
+
+    private FiniteFieldVector decodePayload(FiniteFieldVector encoding) {
+        
+        /* this vector will store the linear combination of coded payloads that
+           correspond to the decoded payload */
+        FiniteFieldVector decodedPayload = new FiniteFieldVector(payloadCoefficientsCount, ff);
+
+        /* linearly combine the payloads */
+        for (int codedPacketId = 0; codedPacketId < encoding.getLength(); codedPacketId++) {
+
+            int coeff = encoding.getCoefficient(codedPacketId);
+
+            /* skip the packet if the coefficient is zero */
+            if (coeff == 0) {
+                continue;
+            }
+
+            FiniteFieldVector codedPayload = packets.get(codedPacketId).getPayload();
+
+            /* linearly combine the payload of packet "codedPacketId" */
+            for (int c = 0; c < codedPayload.getLength(); c++) {
+                int v2 = codedPayload.getCoefficient(c);                
+                int v1 = decodedPayload.getCoefficient(c);
+                int val = ff.sum[v1][ff.mul[coeff][v2]];
+                decodedPayload.setCoefficient(c, val);
+            }
+        }
+        return decodedPayload;
     }
 
 

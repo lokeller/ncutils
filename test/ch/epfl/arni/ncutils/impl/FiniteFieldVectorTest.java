@@ -5,6 +5,7 @@
 
 package ch.epfl.arni.ncutils.impl;
 
+import ch.epfl.arni.ncutils.FiniteFieldVector;
 import ch.epfl.arni.ncutils.FiniteField;
 import java.util.HashSet;
 import org.junit.After;
@@ -18,9 +19,9 @@ import static org.junit.Assert.*;
  *
  * @author lokeller
  */
-public class DenseFiniteFieldVectorTest {
+public class FiniteFieldVectorTest {
 
-    public DenseFiniteFieldVectorTest() {
+    public FiniteFieldVectorTest() {
     }
 
     @BeforeClass
@@ -43,7 +44,7 @@ public class DenseFiniteFieldVectorTest {
 
     @Test
     public void testSetToZero() {        
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoefficient(i, 1);
@@ -58,14 +59,14 @@ public class DenseFiniteFieldVectorTest {
 
     @Test
     public void testCopyTo() {
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
-        DenseFiniteFieldVector instance2 = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoefficient(i, 1);
         }
 
-        instance.copyTo(instance2);
+        FiniteFieldVector instance2 = instance.copy();
 
         for (int i = 0 ; i < 10; i++) {
             assertTrue(instance.getCoefficient(i) == 1);
@@ -75,7 +76,7 @@ public class DenseFiniteFieldVectorTest {
 
     @Test
     public void testSetGetCoefficient() {
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int j = 0 ; j < 10; j++) {
             for (int i = 0 ; i < instance.getFiniteField().getCardinality(); i++) {
@@ -87,42 +88,10 @@ public class DenseFiniteFieldVectorTest {
     }
 
     @Test
-    public void testGetHammingWeight() {
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
-
-        for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 1);
-        }
-
-        assertTrue(instance.getHammingWeight() == 10);
-    }
-
-    @Test
-    public void testGetNonZeroCoefficients() {
-
-        HashSet<Integer> ids = new HashSet<Integer>();
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
-
-        for (int i = 0 ; i < 10; i++) {
-            instance.setCoefficient(i, 1);
-            ids.add(i);
-        }
-
-        HashSet<Integer> others = new HashSet<Integer>();
-
-        for (Integer i : instance.getNonZeroCoefficients()) {
-            others.add(i);
-        }
-
-        assertTrue(others.equals(ids));
-
-    }
-
-    @Test
     public void testGetFiniteField() {
 
         FiniteField ff = new FiniteField(17);
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, ff);
+        FiniteFieldVector instance = new FiniteFieldVector(size, ff);
 
         assertTrue(ff == instance.getFiniteField());
         
@@ -131,18 +100,18 @@ public class DenseFiniteFieldVectorTest {
     @Test
     public void testAdd() {
 
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
-        DenseFiniteFieldVector instance2 = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance2 = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoefficient(i, 1);
             instance2.setCoefficient(i, 7);
         }
 
-        instance.add(instance2);
+        FiniteFieldVector instance3 = instance.add(instance2);
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance.getCoefficient(i) == instance.getFiniteField().sum[1][7]);
+            assertTrue(instance3.getCoefficient(i) == instance.getFiniteField().sum[1][7]);
         }
 
     }
@@ -150,16 +119,16 @@ public class DenseFiniteFieldVectorTest {
     @Test
     public void testScalarMultiply() {
 
-        DenseFiniteFieldVector instance = new DenseFiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoefficient(i, 3);
         }
 
-        instance.scalarMultiply(3);
+        FiniteFieldVector instance2 = instance.scalarMultiply(3);
 
         for (int i = 0 ; i < 10; i++) {
-            assertTrue(instance.getCoefficient(i) == instance.getFiniteField().mul[3][3]);
+            assertTrue(instance2.getCoefficient(i) == instance.getFiniteField().mul[3][3]);
         }
 
     }

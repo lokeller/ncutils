@@ -122,6 +122,91 @@ public class FiniteField {
 
     }
 
+    public FiniteFieldVector byteToVector(byte [] bytes) {
+
+       FiniteFieldVector output = new FiniteFieldVector(coefficientCount(bytes.length), this);
+
+       switch (Q) {
+            case 256:
+
+                for (int i = 0 ; i < bytes.length; i++) {
+                    output.setCoefficient(i, 0xFF & ((int) bytes[i]));
+                }
+
+                return output ;
+            case 16:
+
+                for (int i = 0 ; i < bytes.length; i++) {
+                    output.setCoefficient(2*i, 0x0F & ((int) bytes[i]));
+                    output.setCoefficient(2*i+1, (0xF0 & ((int) bytes[i])) >> 4);
+                }
+                
+                return output ;
+
+            default:
+                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " +Q + ")" );
+        }
+
+
+    }
+
+    public byte[] vectorToBytes(FiniteFieldVector vector) {
+
+        byte[] output = new byte[bytesLength(vector.getLength())];
+
+        switch (Q) {
+            case 256:
+
+                for (int i = 0 ; i < output.length; i++) {
+                    output[i] = (byte) vector.getCoefficient(i);
+                }
+
+                return output;
+                
+            case 16:
+
+                for (int i = 0 ; i < output.length; i++) {
+                    output[i] = (byte) ( (vector.getCoefficient(2*i+1) << 4) + vector.getCoefficient(2*i )) ;
+                }
+                
+                return output;
+
+            default:
+                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
+        }
+    }
+
+    public int bytesLength(int coefficientsCount) {
+
+         switch (Q) {
+            case 256:
+
+                return coefficientsCount;
+
+            case 16:
+
+                return (coefficientsCount + 1) / 2;
+
+            default:
+                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
+        }
+    }
+
+    public int coefficientCount(int bytesLength) {
+         switch (Q) {
+            case 256:
+
+                return bytesLength;
+
+            case 16:
+
+                return bytesLength * 2;
+
+            default:
+                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
+        }
+
+    }
 
     public int getCardinality() {
         return Q;

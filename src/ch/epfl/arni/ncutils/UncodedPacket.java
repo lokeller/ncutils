@@ -19,26 +19,10 @@ public class UncodedPacket {
         this.payload = payload;
     }
 
-    public UncodedPacket(int id, FiniteFieldVector payload, int size) {
-
-        if ( payload.getFiniteField().getCardinality() != 256 &&
-               payload.getFiniteField().getCardinality() != 16 ) {
-            throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was "
-                                            +payload.getFiniteField().getCardinality() );
-        }
+    public UncodedPacket(int id, FiniteFieldVector payload) {        
 
         this.id = id;
-        this.payload = new byte[size];
-
-        if (payload.getFiniteField().getCardinality() == 256) {
-            for (int i = 0 ; i < size; i++) {
-                this.payload[i] = (byte) payload.getCoefficient(i);
-            }
-        } else if (payload.getFiniteField().getCardinality() == 16) {
-            for (int i = 0 ; i < size; i++) {
-                this.payload[i] = (byte) ( (payload.getCoefficient(2*i+1) << 4) + payload.getCoefficient(2*i )) ;
-            }
-        }
+        this.payload = payload.getFiniteField().vectorToBytes(payload);
 
     }
 
@@ -49,5 +33,17 @@ public class UncodedPacket {
     public byte[] getPayload() {
         return payload;
     }
+
+    @Override
+    public String toString() {
+        String ret = "Id: " + id + " Payload: ";
+        for (int k = 0; k < payload.length; k++) {
+            ret += String.format("%02X ", payload[k]);
+        }
+
+        return ret;
+    }
+
+
 
 }

@@ -17,10 +17,9 @@ import org.junit.runners.Suite;
  * @author lokeller
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ch.epfl.arni.ncutils.impl.SparseFiniteFieldVectorTest.class,
-                        ch.epfl.arni.ncutils.impl.DenseFiniteFieldVectorTest.class,
+@Suite.SuiteClasses({ch.epfl.arni.ncutils.impl.FiniteFieldVectorTest.class,
                         ch.epfl.arni.ncutils.impl.FiniteFieldTest.class,
-                        ch.epfl.arni.ncutils.impl.ArrayBasedCodingVectorDecoderTest.class})
+                        ch.epfl.arni.ncutils.impl.CodingVectorDecoderTest.class})
 public class FullTestSuite {
 
     @BeforeClass
