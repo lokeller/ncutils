@@ -1,15 +1,47 @@
+/*
+ * Copyright (c) 2010, EPFL - ARNI
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the EPFL nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 package ch.epfl.arni.ncutils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class implements matrix inversion over finite fields. The algorithm used
- * is a modification of the standard Gaussian-Jordan elimination. The class
- * accepts the matrix that has to be inverted line by line. As soon some lines
- * of the inverted matrix are available they are outputted.
  *
- * Internally the class uses stores two matrices. It uses therefore O(N²) memory.
+ * This class is used to find how to linearly combine coding vectors in order
+ * to obtain elementary vectors. Using this knowledge it is possible to
+ * decoded coded packets.
+ *
+ * The algorithm used in this class is a modification of the standard Gaussian-
+ * Jordan elimination. Each coding vector inserted is simplified with elementary
+ * rows operations trying to obtain an elementary vector. The operations
+ * performed are kept track in an auxiliary vector (one per added vector).
+ *
+ * Internally the class uses O(N²) memory where N is the maximum number of 
+ * packets that can get combined.
  *
  * @author lokeller
  */
@@ -22,13 +54,29 @@ public class CodingVectorDecoder {
          * matrix.
          */
 	private int[][] decodeMatrix;
-        
+
+        /** stores the position of the pivot of each line */
         private int[] pivotPos;
+
+        /** stores for each column if it is a pivot column for a line or not*/
         private boolean[] isPivot;
+
+        /** stores for each column if it has already been decoded or not*/
         private boolean[] decoded;
+
+        /** stores the number of non-zero lines in the decode matrix ( the number
+         * of packets that have been received */
         private int packetCount = 0;
+
+        /** the finite field that is used in this decoder */
         private FiniteField ff;
 
+        /**
+         * Construct a new decoder
+         *
+         * @param maxPackets the length of the vectors have to be decoded
+         * @param ff the finite field used in the decoder
+         */
         public CodingVectorDecoder(int maxPackets, FiniteField ff) {
             decodeMatrix = new int[maxPackets][maxPackets * 2];
             pivotPos = new int[maxPackets];
@@ -38,11 +86,31 @@ public class CodingVectorDecoder {
 
         }
 
+        /**
+         * Returns the maximum number of packets that can be combined (i.e. the
+         * length of the coding vectors being decoded)
+         *
+         * @return the number of packets supported
+         */
         public int getMaxPackets() {
             return decodeMatrix.length;
         }
 
-	public Map<Integer,FiniteFieldVector> decode(FiniteFieldVector v) throws LinearDependantException {
+        /**
+         *
+         * Adds the coding vector to the internal decoding buffer and returns
+         * for new each elementary vector that can be constructed by linearly
+         * combining the vectors in the coding buffer a vector with the
+         * coefficients necessary to create it.
+         *
+         * @param v a coding vector of length compatible with the decoder
+         * @return a map that associates an id of an uncoded packet with a vector
+         * containing the coefficients that must be used to recover its payload
+         * 
+         * @throws LinearDependantException the vector being added is linearly dependant
+         * from the previously decoded vectors.
+         */
+	public Map<Integer,FiniteFieldVector> addVector(FiniteFieldVector v) throws LinearDependantException {
                                 		
                 final int [][] mul = ff.mul;
                 final int [][] sub = ff.sub;
