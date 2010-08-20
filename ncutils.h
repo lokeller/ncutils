@@ -234,6 +234,12 @@ int ff_coordinates_to_bytes(finite_field_t* this, int coordinatesCount) ;
  */
 int ff_bytes_to_coordinates(finite_field_t* this, int bytesLength) ;
 
+/* Returns the result of the specified operation over the specified field */
+int ff_sum(finite_field_t* this, int a , int b);
+int ff_sub(finite_field_t* this, int a, int b);
+int ff_div(finite_field_t* this, int a, int b);
+int ff_mul(finite_field_t* this, int a, int b);
+
 /* Creates a packet decoder that operates with coded packets defined over the finite
  * field ff, with coding coefficient vectors of length max_packets and with payloads
  * of lenght payload_length_bytes bytes */

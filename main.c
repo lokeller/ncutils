@@ -125,9 +125,9 @@ void test_decode_headers () {
             for ( k = 0 ; k < size ; k++) {
                 int v1 = vector_get_coordinate(vectors[i], k);
                 int v2 = vector_get_coordinate(inverse[k],j);
-                int val1 = ff->mul[v1 * ff->q + v2];
+                int val1 = ff_mul(ff, v1, v2);
 
-                sum = ff->sum[sum * ff->q + val1];
+                sum = ff_sum(ff, sum, val1);
             }
 
 
@@ -252,8 +252,16 @@ void test_decode() {
  */
 int main(int argc, char** argv) {
 
+
+
+    test_decode_headers();
+
     test_decode();
 
+    finite_field_t *ff = create_extension_field(2,8);
+
+    printf("%d", ff_sub(ff, 5 , 10));
+    
     return (EXIT_SUCCESS);
 }
 

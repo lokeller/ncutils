@@ -197,3 +197,20 @@ int ff_bytes_to_coordinates(finite_field_t* this, int bytesLength) {
     }
 
 }
+
+
+int ff_sum(finite_field_t* this, int a , int b) {
+    return this->sum[ this->q * a + b];
+}
+
+int ff_sub(finite_field_t* this, int a, int b) {
+    return this->sub[ this->q * a + b];
+}
+
+int ff_div(finite_field_t* this, int a, int b) {
+    return this->div[ this->q * a + b];
+}
+
+int ff_mul(finite_field_t* this, int a, int b) {
+    return this->mul[ this->q * a + b];
+}
