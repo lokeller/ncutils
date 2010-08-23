@@ -32,6 +32,7 @@
 #include <sys/resource.h>
 
 #include "ncutils.h"
+#include "ncutils_priv.h"
 
 void test_decode_headers () {
     int i, j, k;
@@ -61,9 +62,8 @@ void test_decode_headers () {
     for ( i = 0; i < size; i++) {
         vectors[i] = create_vector(size, ff);
 
-        for ( j = 0; j < size ; j++) {
-            //if (i == j) vectors[i]->coordinates[j] = 1;
-            vector_set_coordinate(vectors[i], j, rand() % ff->q);
+        for ( j = 0; j < size ; j++) {            
+            vector_set_coordinate(vectors[i], j, rand() % ff_get_cardinality(ff));
         }
 
     }
@@ -99,12 +99,12 @@ void test_decode_headers () {
 
         
         printf("Decoded at round %d\n", i);
-        for ( j = 0; j < o->count ; j++) {
-            inverse[o->coordinates[j]] = vector_copy(o->coefficients[j]);
+        for ( j = 0; j < decoded_coordinates_get_count(o) ; j++) {
+            inverse[decoded_coordinates_get_coordinate(o,j)] = vector_copy(decoded_coordinates_get_coefficients(o,j));
             char string[400];
-            vector_to_string(inverse[o->coordinates[j]], string, 400);
+            vector_to_string(inverse[decoded_coordinates_get_coordinate(o,j)], string, 400);
             //vector_to_string(o->coefficients[j], string, 400);
-            printf("%d -  %s\n\n", inverse[o->coordinates[j]]->length, string);
+            printf("%d -  %s\n\n", vector_get_length(inverse[decoded_coordinates_get_coordinate(o,j)]), string);
         }
 
         destroy_decoded_coordinates(o);
@@ -236,9 +236,9 @@ void test_decode() {
                 continue;
             } 
 
-            for (j = 0 ; j < packets->count; j++) {
+            for (j = 0 ; j < decoded_packets_get_count(packets); j++) {
                 char output[500];
-                uncoded_packet_to_string(packets->packets[j],output, 500);
+                uncoded_packet_to_string(decoded_packets_get_packet(packets,j),output, 500);
                 printf("%s\n", output);
             }
 
@@ -252,15 +252,9 @@ void test_decode() {
  */
 int main(int argc, char** argv) {
 
-
-
     test_decode_headers();
 
     test_decode();
-
-    finite_field_t *ff = create_extension_field(2,8);
-
-    printf("%d", ff_sub(ff, 5 , 10));
     
     return (EXIT_SUCCESS);
 }

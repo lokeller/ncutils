@@ -25,6 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "ncutils_priv.h"
 #include "ncutils.h"
 #include <assert.h>
 #include <malloc.h>

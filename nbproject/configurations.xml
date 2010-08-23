@@ -17,6 +17,7 @@
       <itemPath>coding_vector_decoder.c</itemPath>
       <itemPath>finite_field.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>ncutils_priv.h</itemPath>
       <itemPath>packet_decoder.c</itemPath>
       <itemPath>uncoded_packet.c</itemPath>
       <itemPath>vector.c</itemPath>

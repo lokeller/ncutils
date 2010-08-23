@@ -29,6 +29,7 @@
 #include <memory.h>
 
 #include "ncutils.h"
+#include "ncutils_priv.h"
 
 coding_vector_decoder_t* create_coding_vector_decoder(int max_packets, finite_field_t* ff) {
 
@@ -249,4 +250,19 @@ decoded_coordinates_t* coding_vector_decoder_add_vector(coding_vector_decoder_t 
 
     return decoded;
 
+}
+
+
+int decoded_coordinates_get_count(p_decoded_coordinates_t this) {
+    return this->count;
+}
+
+
+int decoded_coordinates_get_coordinate(p_decoded_coordinates_t this, int pos) {
+    return this->coordinates[pos];
+}
+
+
+p_vector_t decoded_coordinates_get_coefficients(p_decoded_coordinates_t this, int pos) {
+    return this->coefficients[pos];
 }

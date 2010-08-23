@@ -26,6 +26,7 @@
 */
 
 #include "ncutils.h"
+#include "ncutils_priv.h"
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
@@ -38,7 +39,7 @@ finite_field_t *create_extension_field(int b, int m) {
     int c,i,j,k;
     int q;
     finite_field_t *this;
-
+ 
     assert(b > 1 && m > 0);
     assert(b == 2 && m <= 16);
 
@@ -213,4 +214,8 @@ int ff_div(finite_field_t* this, int a, int b) {
 
 int ff_mul(finite_field_t* this, int a, int b) {
     return this->mul[ this->q * a + b];
+}
+
+int ff_get_cardinality(p_finite_field_t this) {
+    return this->q;
 }

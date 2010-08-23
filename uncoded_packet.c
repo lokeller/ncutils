@@ -28,6 +28,7 @@
 #include <malloc.h>
 #include <memory.h>
 #include "ncutils.h"
+#include "ncutils_priv.h"
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -88,4 +89,16 @@ void uncoded_packet_to_string(uncoded_packet_t* this, char* buffer, int len) {
         }
     }
 
+}
+
+char *uncoded_packet_get_payload(p_uncoded_packet_t this) {
+    return this->payload;
+}
+
+int uncoded_packet_get_payload_length(p_uncoded_packet_t this) {
+    return this->payloadLen;
+}
+
+int uncoded_packet_get_id(p_uncoded_packet_t this) {
+    return this->id;
 }

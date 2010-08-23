@@ -26,6 +26,7 @@
 */
 
 #include "ncutils.h"
+#include "ncutils_priv.h"
 #include <assert.h>
 #include <malloc.h>
 #include <memory.h>
@@ -138,4 +139,11 @@ void vector_set_coordinate(vector_t *this, int coordinate, int value) {
 
 finite_field_t *vector_get_finite_field(vector_t *this) {
     return this->ff;
+}
+
+p_vector_t cp_get_coding_vector(p_coded_packet_t this) {
+    return this->coding_vector;
+}
+p_vector_t cp_get_payload_vector(p_coded_packet_t this) {
+    return this->payload;
 }

@@ -25,6 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "ncutils_priv.h"
 #include "ncutils.h"
 #include <assert.h>
 #include <malloc.h>
@@ -62,7 +63,7 @@ decoded_packets_t *_create_decoded_packets(int count) {
 
 }
 
-void destroy_decoded_packets(decoded_packets_t *this) {
+void destroy_decoded_packets(p_decoded_packets_t this) {
 
     int i;
 
@@ -115,7 +116,7 @@ vector_t *_packet_decoder_decode_payload(packet_decoder_t *this, vector_t *encod
 }
 
 
-decoded_packets_t *packet_decoder_add_packet(packet_decoder_t* this, coded_packet_t* p) {
+p_decoded_packets_t packet_decoder_add_packet(p_packet_decoder_t this, p_coded_packet_t p) {
 
     decoded_coordinates_t *coords;
     decoded_packets_t *packets;
@@ -153,6 +154,13 @@ decoded_packets_t *packet_decoder_add_packet(packet_decoder_t* this, coded_packe
 
 }
 
+int decoded_packets_get_count(p_decoded_packets_t this) {
+    return this->count;
+}
+
+p_uncoded_packet_t decoded_packets_get_packet(p_decoded_packets_t this, int pos) {
+    return this->packets[pos];
+}
 
 
 
