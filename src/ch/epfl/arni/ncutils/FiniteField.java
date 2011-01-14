@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, EPFL - ARNI
+ * Copyright (c) 2010 - 2011, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,22 +190,34 @@ public class FiniteField {
      * @return the representation of the array as a vector
      */
     public FiniteFieldVector byteToVector(byte [] bytes) {
+    	return byteToVector(bytes, 0, bytes.length);
+    }
+    
+    /**
+     * Convert a byte array to its finite field vector representation
+     *
+     * @param bytes an array of bytes
+     * @param offset the offset of the first byte to be converted
+     * @param length the number of bytes that must be converted
+     * @return the representation of the array as a vector
+     */
+    public FiniteFieldVector byteToVector(byte [] bytes, int offset, int length) {
 
-       FiniteFieldVector output = new FiniteFieldVector(coordinatesCount(bytes.length), this);
+       FiniteFieldVector output = new FiniteFieldVector(coordinatesCount(length), this);
 
        switch (Q) {
             case 256:
 
-                for (int i = 0 ; i < bytes.length; i++) {
-                    output.setCoordinate(i, 0xFF & ((int) bytes[i]));
+                for (int i = 0 ; i < length; i++) {
+                    output.setCoordinate(i, 0xFF & ((int) bytes[i+offset]));
                 }
 
                 return output ;
             case 16:
 
-                for (int i = 0 ; i < bytes.length; i++) {
-                    output.setCoordinate(2*i, 0x0F & ((int) bytes[i]));
-                    output.setCoordinate(2*i+1, (0xF0 & ((int) bytes[i])) >> 4);
+                for (int i = 0 ; i < length; i++) {
+                    output.setCoordinate(2*i, 0x0F & ((int) bytes[i+offset]));
+                    output.setCoordinate(2*i+1, (0xF0 & ((int) bytes[i+offset])) >> 4);
                 }
                 
                 return output ;
