@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, EPFL - ARNI
+ * Copyright (c) 2010 - 2011, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ public class PacketDecoder {
     public PacketDecoder(FiniteField field, int maxPackets, int payloadBytesLength) {
         this.ff = field;
         codingVectorDecoder = new CodingVectorDecoder(maxPackets,ff);
-        this.payloadCoordinatesCount = ff.bytesLength(payloadBytesLength);
+        this.payloadCoordinatesCount = ff.coordinatesCount(payloadBytesLength);
     }
 
     /**
@@ -134,6 +134,27 @@ public class PacketDecoder {
         return decodedPayload;
     }
 
+
+
+    /**
+     * Returns the maximum number of packets that can be combined
+     *
+     * @return the number of packets that can be combined at most
+     */
+    public int getMaxPackets() {
+        return codingVectorDecoder.getMaxPackets();
+    }
+
+
+    /**
+     * 
+     * Returns the number of linearly independent packets received up to now
+     * 
+     * @return a number between 0 and getMaxPackets()
+     */
+    public int getSubspaceSize() {
+    	return codingVectorDecoder.getSubspaceSize();
+    }
 
 
 
