@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, EPFL - ARNI
+ * Copyright (c) 2010 - 2011, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,13 @@ public class CodingVectorDecoder {
          * from the previously decoded vectors.
          */
 	public Map<Integer,FiniteFieldVector> addVector(FiniteFieldVector v) throws LinearDependantException {
-                                		
+        
+		
+                /* if the matrix is already full rank don't add this vector */
+                if ( packetCount == decodeMatrix.length) {
+                        throw new LinearDependantException();
+                }
+		
                 final int [][] mul = ff.mul;
                 final int [][] sub = ff.sub;
                 final int [][] div = ff.div;
@@ -239,6 +245,15 @@ public class CodingVectorDecoder {
 		
 	}
 
-    
+    /**
+     * Returns the number of linearly independent coding vectors received
+     * up to now.
+     * 
+     * @return a number between 0 and getMaxPackets()
+     */
+	public int getSubspaceSize() {
+		return packetCount;
+	}
+	
 		
 }
