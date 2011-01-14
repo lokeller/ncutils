@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package ch.epfl.arni.ncutils.examples;
+package examples;
 
 import ch.epfl.arni.ncutils.CodedPacket;
 import ch.epfl.arni.ncutils.FiniteField;
@@ -100,7 +100,7 @@ public class BlockLevelExample {
         printCodedPackets(Arrays.asList(networkOutput), payloadLenCoeffs);
 
         /* decode the received packets */
-        PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLenCoeffs);
+        PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLen);
 
         System.out.println(" Decoded packets: ");
         for ( int i = 0; i < blockNumber ; i++) {
