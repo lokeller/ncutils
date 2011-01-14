@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, EPFL - ARNI
+ * Copyright (c) 2010 - 2011, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,29 @@ public class CodedPacket {
         
     }
 
+    /**
+     * Creates a coded packet from its binary representation.
+     *
+     * @param maxPackets the maximal number of uncoded packets that can be combined
+     * in this coded packet. This correspond to the length of teh coding vector.
+     * 
+     * @param data an array containing the binary representation of the coded packet
+     * @param offset the first byte of the binary representation in the array data
+     * @param length the length of the binary representation
+     * @param ff The finite field that over which the vectors in the packet are
+     * defined
+     */
+    
+    public CodedPacket(int maxPackets, byte[] data, int offset, int length, FiniteField ff) {
+    	
+    	int headerLen = ff.bytesLength(maxPackets);
+    	
+    	this.codingVector = ff.byteToVector(data, offset, headerLen);
+    	this.payloadVector = ff.byteToVector(data, headerLen+offset, length - headerLen);
+    	
+        
+    }
+    
     private CodedPacket(FiniteFieldVector codingVector, FiniteFieldVector payloadVector) {
         this.codingVector = codingVector;
         this.payloadVector = payloadVector;
@@ -225,6 +248,25 @@ public class CodedPacket {
         return new CodedPacket(codingVector.scalarMultiply(c), payloadVector.scalarMultiply(c));
         
     }
+    
+    
+    /**
+     * Returns the binary representation of the packet
+     * 
+     * @return a byte array containing coding vector and payload
+     */
+    public byte[] toByteArray() {
+    	byte [] header = codingVector.getFiniteField().vectorToBytes(codingVector);
+    	byte [] payload = payloadVector.getFiniteField().vectorToBytes(payloadVector);
+    	
+    	byte[] ret = new byte[header.length + payload.length];
+    	System.arraycopy(header, 0, ret, 0, header.length);
+    	System.arraycopy(payload, 0, ret, header.length, payload.length);
+    	
+    	return ret;
+    	
+    }
+    
 
     @Override
     public String toString() {
