@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 - 2011, EPFL - ARNI
+ * Copyright (c) 2010, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
 */
 package ch.epfl.arni.ncutils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -110,11 +111,15 @@ public class PacketDecoder {
         /* this vector will store the linear combination of coded payloads that
            correspond to the decoded payload */
         FiniteFieldVector decodedPayload = new FiniteFieldVector(payloadCoordinatesCount, ff);
-
+        int[] coordinates3 = decodedPayload.coordinates;
+        
         /* linearly combine the payloads */
+        
+        int[] coordinates = encoding.coordinates;
+        
         for (int codedPacketId = 0; codedPacketId < encoding.getLength(); codedPacketId++) {
-
-            int coeff = encoding.getCoordinate(codedPacketId);
+          
+			int coeff = coordinates[codedPacketId];
 
             /* skip the packet if the coordinate is zero */
             if (coeff == 0) {
@@ -122,19 +127,23 @@ public class PacketDecoder {
             }
 
             FiniteFieldVector codedPayload = packets.get(codedPacketId).getPayload();
-
+            int[] coordinates2 = codedPayload.coordinates;
+            
             /* linearly combine the payload of packet "codedPacketId" */
-            for (int c = 0; c < codedPayload.getLength(); c++) {
-                int v2 = codedPayload.getCoordinate(c);
-                int v1 = decodedPayload.getCoordinate(c);
+            for (int c = 0; c < codedPayload.getLength(); c++) {               
+				int v2 = coordinates2[c];                
+				int v1 = coordinates3[c];
                 int val = ff.sum[v1][ff.mul[coeff][v2]];
-                decodedPayload.setCoordinate(c, val);
+                coordinates3[c] = val;
             }
         }
         return decodedPayload;
     }
 
-
+    
+    public List<CodedPacket> getCodedPackets() {
+    	return packets;
+    }
 
     /**
      * Returns the maximum number of packets that can be combined
@@ -155,7 +164,7 @@ public class PacketDecoder {
     public int getSubspaceSize() {
     	return codingVectorDecoder.getSubspaceSize();
     }
-
+    
 
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 - 2011, EPFL - ARNI
+ * Copyright (c) 2010, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ public class CodedPacket {
 
         this( new FiniteFieldVector(maxPackets, ff), ff.byteToVector(packet.getPayload()));
 
-        codingVector.setCoordinate(packet.getId(), 1);
+        codingVector.coordinates[packet.getId()] = 1;
     }
 
     /**
@@ -101,8 +101,7 @@ public class CodedPacket {
     	int headerLen = ff.bytesLength(maxPackets);
     	
     	this.codingVector = ff.byteToVector(data, offset, headerLen);
-    	this.payloadVector = ff.byteToVector(data, headerLen+offset, length - headerLen);
-    	
+    	this.payloadVector = ff.byteToVector(data, headerLen+offset, length - headerLen);    	
         
     }
     
@@ -110,7 +109,7 @@ public class CodedPacket {
         this.codingVector = codingVector;
         this.payloadVector = payloadVector;
     }
-
+      
 
     /**
      * Returns the coding vector of this packet. The coding vector describes
@@ -174,8 +173,8 @@ public class CodedPacket {
      *
      * Get the index-th coordinate of the vector representation of the packet. If
      * index is smaller than the length of the coding vector the corresponding
-     * coding vector coordinate will be returned, otherwise the cofficient index -
-     * (lenght of the coding vector) of the payload will be returned
+     * coding vector coordinate will be returned, otherwise the coefficient index -
+     * (length of the coding vector) of the payload will be returned
      *
      * @param index the index of the coordinate that must be retrieved
      * @return the value of the coordinate, an element of the field over which the packet is defined
@@ -230,6 +229,19 @@ public class CodedPacket {
     }
 
     /**
+    *
+    * Adds the specified CodedPacket to the current CodedPacket. This method
+    * modifies the CodedPacket.
+    *
+    * @param vector the CodedPacket that will be summed
+    *  
+    */
+    public void  addInPlace(CodedPacket vector) {
+    	codingVector.addInPlace(vector.codingVector);
+    	payloadVector.addInPlace(vector.payloadVector);
+    }
+        
+    /**
      *
      * Returns a CodedPacket which is a scalar multiple of the current
      * CodedPacket. The created packet will have a coding and payload vector
@@ -249,6 +261,55 @@ public class CodedPacket {
         
     }
     
+    /**
+    *
+    * Multiplies the CodedPacket by a scalar. This method modifies the CodedPacket.
+    *
+    * @param c an element of the finite field used to define this packet that
+    * will be used to multiply the packet
+    * 
+    */
+    
+    public void scalarMultiplyInPlace(int c) {        
+    	codingVector.scalarMultiplyInPlace(c);
+    	payloadVector.scalarMultiply(c);
+    }
+    
+    
+    /**
+    *
+    * Returns a CodedPacket which is the sum of the current packet and a scalar multiple 
+    * of the another CodedPacket. The created packet will have a coding and 
+    * payload vector which will be consistent, i.e. the content of the payload of the 
+    * newly created packet corresponds to the linear combination specified in its
+    * coding vector
+    *
+    * @param c an element of the finite field used to define this packet that
+    * will be used to multiply the packet that will be added
+    * @param packet a packet that will be multiplied by c and then added to obtain the resulting
+    * packet
+    * @return the sum of the current packet and the scalar multiple of packet. The i-th coordinate
+    * of this vector is equal to the sum of the i-th coordinate of the current vector and the i-th
+    * coordinate of packet multiplied by c 
+    */
+    public CodedPacket multiplyAndAdd(int c, CodedPacket packet) {
+        assert(packet.getFiniteField() == getFiniteField());
+
+        return new CodedPacket(codingVector.multiplyAndAdd(c, packet.codingVector), payloadVector.multiplyAndAdd(c, packet.payloadVector));
+
+    }
+    
+    /**
+     * Adds to the current packet the CodedPacket other multiplied by c. This
+     * method modifies the current CodedPacket 
+     * 
+     * @param c an element of the finite field used to define this 
+     * @param other another packet with the parameters as the current packet
+     */
+    public void  multiplyAndAddInPlace(int c, CodedPacket other) {
+    	codingVector.multiplyAndAddInPlace(c, other.codingVector);
+    	payloadVector.multiplyAndAddInPlace(c, other.payloadVector);
+    }
     
     /**
      * Returns the binary representation of the packet
@@ -256,12 +317,15 @@ public class CodedPacket {
      * @return a byte array containing coding vector and payload
      */
     public byte[] toByteArray() {
-    	byte [] header = codingVector.getFiniteField().vectorToBytes(codingVector);
-    	byte [] payload = payloadVector.getFiniteField().vectorToBytes(payloadVector);
     	
-    	byte[] ret = new byte[header.length + payload.length];
-    	System.arraycopy(header, 0, ret, 0, header.length);
-    	System.arraycopy(payload, 0, ret, header.length, payload.length);
+    	FiniteField ff = getFiniteField();
+    	
+    	int headerLength = ff.bytesLength(codingVector.getLength());
+    	
+		byte[] ret = new byte[headerLength + ff.bytesLength(payloadVector.getLength())];
+    	
+    	ff.vectorToBytes(codingVector, ret, 0);
+    	ff.vectorToBytes(payloadVector, ret, headerLength);    	
     	
     	return ret;
     	

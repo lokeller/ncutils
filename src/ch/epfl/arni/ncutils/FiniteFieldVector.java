@@ -36,7 +36,7 @@ import java.util.Arrays;
 
 public class FiniteFieldVector {
 
-    private int[] coordinates;
+    int[] coordinates;
     private FiniteField ff ;
 
     /**
@@ -50,6 +50,11 @@ public class FiniteFieldVector {
         coordinates = new int[length];
     }
 
+    public FiniteFieldVector(int [] coordinates, FiniteField ff) {
+        this.ff = ff;
+        this.coordinates = coordinates;
+    }
+    
     /**
      * Returns the number of coordinates of the vector
      *
@@ -137,6 +142,14 @@ public class FiniteFieldVector {
 
         return out;
     }
+    
+    public void addInPlace(FiniteFieldVector vector) {
+
+        for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            coordinates[i] = ff.sum[coordinates[i]][vector.coordinates[i]];
+        }
+
+    }
 
     /**
      * Returns the scalar multiplication of this vector by a coefficient
@@ -157,8 +170,65 @@ public class FiniteFieldVector {
         return out;
 
     }
+    
+    public void scalarMultiplyInPlace(int c) {
+    	for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            coordinates[i] = ff.mul[coordinates[i]][c];
+        }    
+    }
+    
+    public FiniteFieldVector multiplyAndAdd(int c, FiniteFieldVector other) {
+    	
+        assert(c < ff.getCardinality() && c >= 0);
+        
+        FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
 
+        for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            out.coordinates[i] = ff.sum[ff.mul[other.coordinates[i]][c]][coordinates[i]];
+        }
+
+        return out;
+    	
+    }
+
+    public void multiplyAndAddInPlace(int c, FiniteFieldVector other) {
+
+        for ( int i = 0 ; i < coordinates.length ; i++ ) {
+            coordinates[i] = ff.sum[ff.mul[other.coordinates[i]][c]][coordinates[i]];
+        }
+    	
+    }
+    
+    
     @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(coordinates);
+		result = prime * result + ((ff == null) ? 0 : ff.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof FiniteFieldVector))
+			return false;
+		FiniteFieldVector other = (FiniteFieldVector) obj;
+		if (!Arrays.equals(coordinates, other.coordinates))
+			return false;
+		if (ff == null) {
+			if (other.ff != null)
+				return false;
+		} else if (!ff.equals(other.ff))
+			return false;
+		return true;
+	}
+
+	@Override
     public String toString() {
             String ret = "";
             for (int c : coordinates) {

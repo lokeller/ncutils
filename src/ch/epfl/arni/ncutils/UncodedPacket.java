@@ -26,6 +26,8 @@
 */
 package ch.epfl.arni.ncutils;
 
+import java.util.Arrays;
+
 /**
  *
  * This class represents an uncoded packet. An uncoded packet
@@ -91,6 +93,38 @@ public class UncodedPacket {
         return ret;
     }
 
+	public UncodedPacket copy() {
+		UncodedPacket copy = new UncodedPacket(this.id, new byte[payload.length]);
+		
+		System.arraycopy(payload, 0, copy.payload, 0, payload.length);
+		
+		return copy;
+	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		result = prime * result + Arrays.hashCode(payload);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof UncodedPacket))
+			return false;
+		UncodedPacket other = (UncodedPacket) obj;
+		if (id != other.id)
+			return false;
+		if (!Arrays.equals(payload, other.payload))
+			return false;
+		return true;
+	}
+	
 
 }

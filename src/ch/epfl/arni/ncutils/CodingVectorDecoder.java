@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 - 2011, EPFL - ARNI
+ * Copyright (c) 2010, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,10 +113,10 @@ public class CodingVectorDecoder {
 	public Map<Integer,FiniteFieldVector> addVector(FiniteFieldVector v) throws LinearDependantException {
         
 		
-                /* if the matrix is already full rank don't add this vector */
-                if ( packetCount == decodeMatrix.length) {
-                        throw new LinearDependantException();
-                }
+				/* if the matrix is already full rank don't add this vector */
+				if ( packetCount == decodeMatrix.length) {
+					throw new LinearDependantException();
+				}
 		
                 final int [][] mul = ff.mul;
                 final int [][] sub = ff.sub;
@@ -127,7 +127,7 @@ public class CodingVectorDecoder {
 
                 /* add the received packet at the bottom of the matrix */
                 for ( int i = 0 ; i < v.getLength() ; i++) {
-                    decodeMatrix[packetCount][i] = v.getCoordinate(i);
+                    decodeMatrix[packetCount][i] = v.coordinates[i];
                     decodeMatrix[packetCount][i+size] = 0 ;                    
                 }
 
@@ -232,8 +232,9 @@ public class CodingVectorDecoder {
 
                         /* build the vector that explains how to obtain the block */
                         FiniteFieldVector vector = new FiniteFieldVector(decodeMatrix.length, ff);
-                        for ( int j = size ; j < size + size ; j++) {
-                            vector.setCoordinate(j-size, decodeMatrix[i][j]);
+                        int[] coordinates = vector.coordinates;
+                        for ( int j = size ; j < size + size ; j++) {                            
+							coordinates[j-size] = decodeMatrix[i][j];
                         }
 
                         willDecode.put(pos, vector);

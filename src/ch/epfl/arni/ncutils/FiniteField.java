@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 - 2011, EPFL - ARNI
+ * Copyright (c) 2010, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ public class FiniteField {
     public static FiniteField getDefaultFiniteField() {
         return finiteField;
     }
-
+    
     /**
      * Associates each field element to its inverse
      */
@@ -184,13 +184,30 @@ public class FiniteField {
     }
 
     /**
-     * Convert a byte array to its finite field vector representation
+     * Convert a byte array to its finite field vector representation, this method
+     * creates a vector with as many coordinates as they can be read from the byte
+     * array
      *
      * @param bytes an array of bytes
      * @return the representation of the array as a vector
      */
     public FiniteFieldVector byteToVector(byte [] bytes) {
-    	return byteToVector(bytes, 0, bytes.length);
+    	return byteToVector(bytes, coordinatesCount(bytes.length));
+    }
+    
+    /**
+     * Convert a byte array to its finite field vector representation
+     *
+     * @param bytes an array of bytes
+     * @param coordinates how many coordinates should be read
+     * @return the representation of the array as a vector
+     */
+    public FiniteFieldVector byteToVector(byte [] bytes, int coordinates) {
+    	return byteToVector(bytes, 0, bytes.length, coordinates);
+    }
+    
+    FiniteFieldVector byteToVector(byte [] bytes, int offset, int length) {
+    	return byteToVector(bytes, offset, length, coordinatesCount(bytes.length));
     }
     
     /**
@@ -201,31 +218,17 @@ public class FiniteField {
      * @param length the number of bytes that must be converted
      * @return the representation of the array as a vector
      */
-    public FiniteFieldVector byteToVector(byte [] bytes, int offset, int length) {
-
-       FiniteFieldVector output = new FiniteFieldVector(coordinatesCount(length), this);
-
-       switch (Q) {
-            case 256:
-
-                for (int i = 0 ; i < length; i++) {
-                    output.setCoordinate(i, 0xFF & ((int) bytes[i+offset]));
-                }
-
-                return output ;
-            case 16:
-
-                for (int i = 0 ; i < length; i++) {
-                    output.setCoordinate(2*i, 0x0F & ((int) bytes[i+offset]));
-                    output.setCoordinate(2*i+1, (0xF0 & ((int) bytes[i+offset])) >> 4);
-                }
-                
-                return output ;
-
-            default:
-                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " +Q + ")" );
-        }
-
+    public FiniteFieldVector byteToVector(byte [] bytes, int offset, int length, int coordinates) {
+    	
+    	int [] data = new int[coordinates];
+    	
+    	int bitsPerField = bitsPerCoordinate();        
+    	
+    	for ( int i = 0 ; i < coordinates; i++) {
+    		data[i] = readBits(bytes, offset, i, bitsPerField);
+    	}
+    	
+        return new FiniteFieldVector(data, this);        
 
     }
 
@@ -236,29 +239,60 @@ public class FiniteField {
      * @return the byte array representation
      */
     public byte[] vectorToBytes(FiniteFieldVector vector) {
+    	byte[] output = new byte[bytesLength(vector.getLength())];
+    	vectorToBytes(vector, output, 0);
+    	return output;
+    }
+    	
+    
+    private void writeBits(byte[] data, int offset, int field, int value, int fieldSize) {
+        int start_bit, end_bit, i;        
 
-        byte[] output = new byte[bytesLength(vector.getLength())];
+        value = value % Q;
 
-        switch (Q) {
-            case 256:
+        start_bit = field * fieldSize;
+        end_bit = ( field + 1) * fieldSize;        
 
-                for (int i = 0 ; i < output.length; i++) {
-                    output[i] = (byte) vector.getCoordinate(i);
-                }
+        for ( i = start_bit; i < end_bit; i++) {
+                byte mask, bit;
 
-                return output;
-                
-            case 16:
+                mask = (byte) ( ~( 1 << (i % 8)));
+                bit = (byte) (( ( value >> (fieldSize - 1) ) & 0x1) << ( i % 8));
 
-                for (int i = 0 ; i < output.length; i++) {
-                    output[i] = (byte) ( (vector.getCoordinate(2*i+1) << 4) + vector.getCoordinate(2*i )) ;
-                }
-                
-                return output;
-
-            default:
-                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
+                data[i / 8+offset] = (byte) (( data[i / 8 +offset] & mask) | bit);
+                value = value << 1;
         }
+
+    }
+    
+    private int readBits(byte[] data, int offset, int field, int fieldSize) {
+    	
+        int start_bit, end_bit, i;
+        int ret;
+
+        start_bit = field * fieldSize;
+        end_bit = ( field + 1) * fieldSize;
+
+        ret = 0;
+
+        for (i = start_bit; i < end_bit; i++) {
+                ret = (ret << 1 ) | ( (data[i / 8+offset] >> ( i%8)) & 0x1);
+        }        
+        
+        return ret % Q;
+    	
+    }
+    
+    void vectorToBytes (FiniteFieldVector vector, byte [] output, int start) {    	       
+
+        int[] coordinates = vector.coordinates;
+        
+        int bitsPerField = bitsPerCoordinate();
+        
+        for ( int i = 0 ; i < coordinates.length; i++) {
+        	writeBits(output, start, i, coordinates[i], bitsPerField);
+        }
+        
     }
 
 
@@ -271,19 +305,22 @@ public class FiniteField {
      */
     public int bytesLength(int coordinatesCount) {
 
-         switch (Q) {
-            case 256:
-
-                return coordinatesCount;
-
-            case 16:
-
-                return (coordinatesCount + 1) / 2;
-
-            default:
-                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
-        }
+    	int bitsPerCoordinate = bitsPerCoordinate();
+    	
+    	return (int) Math.ceil(((double) (coordinatesCount * bitsPerCoordinate)) / 8.0);
+    	
     }
+
+    /**
+     * Returns the number of bits necessary to represent an element of the field
+     * 
+     * @return the number of bits necessary to store a field element
+     */
+    
+	public int bitsPerCoordinate() {
+		int bitsPerCoordinate = (int) Math.ceil(Math.log(Q) / Math.log(2));
+		return bitsPerCoordinate;
+	}
 
     /**
      * Returns the number of coordinates that can be represented with a given
@@ -293,18 +330,10 @@ public class FiniteField {
      * @return the number of bytes
      */
     public int coordinatesCount(int bytesLength) {
-         switch (Q) {
-            case 256:
-
-                return bytesLength;
-
-            case 16:
-
-                return bytesLength * 2;
-
-            default:
-                throw new RuntimeException("The only field size supported is 2^8 and 2^4 ( Q was " + Q + ")" );
-        }
+    	
+    	int bitsPerCoordinate = bitsPerCoordinate();
+    	
+    	return bytesLength * 8 / bitsPerCoordinate;
 
     }
 
