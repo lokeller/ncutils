@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, EPFL - ARNI
+ * Copyright (c) 2010-11, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ import java.util.Arrays;
  *
  * @author lokeller
  */
-public class UncodedPacket {
+public class UncodedPacket implements Comparable<UncodedPacket> {
 
     private int id;
     private byte[] payload;
@@ -125,6 +125,14 @@ public class UncodedPacket {
 			return false;
 		return true;
 	}
+
+    public int compareTo(UncodedPacket o) {
+
+        if (o.getId() == this.getId()) return 0;
+        else if ( o.id < this.id) return -1;
+        else return 1;
+        
+    }
 	
 
 }
