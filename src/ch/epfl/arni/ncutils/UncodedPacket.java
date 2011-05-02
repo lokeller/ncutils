@@ -129,7 +129,7 @@ public class UncodedPacket implements Comparable<UncodedPacket> {
     public int compareTo(UncodedPacket o) {
 
         if (o.getId() == this.getId()) return 0;
-        else if ( o.id < this.id) return -1;
+        else if ( o.id > this.id) return -1;
         else return 1;
         
     }
