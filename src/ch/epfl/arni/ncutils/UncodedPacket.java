@@ -42,13 +42,32 @@ public class UncodedPacket implements Comparable<UncodedPacket> {
 
     /**
      * Constructs a new UncodedPacket with the specified id and payload
+     * The uncoded packet contains a reference to the payload therefore
+     * any change to the array payload will be reflected in the contents
+     * of the uncoded packet.
+     *
+     * @param id the id of the packet
+     * @param payload the payload
+     */
+    public static UncodedPacket wrap(int id, byte[] payload) {
+        UncodedPacket pkt = new UncodedPacket(id);
+        pkt.payload = payload;
+        return pkt;
+    }
+
+    private UncodedPacket(int id) {
+        this.id = id;
+    }
+
+    /**
+     * Constructs a new UncodedPacket with the specified id and payload
      *
      * @param id the id of the packet
      * @param payload the payload
      */
     public UncodedPacket(int id, byte[] payload) {
         this.id = id;
-        this.payload = payload;
+        this.payload = Arrays.copyOf(payload, payload.length);
     }
 
     /**

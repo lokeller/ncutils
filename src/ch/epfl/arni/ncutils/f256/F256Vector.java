@@ -39,11 +39,14 @@ import ch.epfl.arni.ncutils.FiniteField;
 
 public class F256Vector {
 
-	private static FiniteField ff = F256.getF256();
+    private static FiniteField ff = F256.getF256();
 	
     byte[] coordinates;
     int offset;
     int len;
+
+    private F256Vector() {
+    }
 
     /**
      * Constructs a vector
@@ -57,12 +60,41 @@ public class F256Vector {
         this.len = len;
     }
 
-    public F256Vector(byte [] coordinates, int offset, int len) {        
-        this.coordinates = coordinates;
-        this.offset = offset;
+    /**
+     * Creates a F256Vector by copying the content of a given array
+     *
+     * @param coordinates array that stores the coordinates of the vector
+     * @param offset offset at which the first coordinate can be found
+     * @param len number of coordinates
+     */
+    public F256Vector(byte [] coordinates, int offset, int len) {
+        this.coordinates = new byte[len];
+        System.arraycopy(coordinates, offset, this.coordinates, 0, len);
+        this.offset = 0;
         this.len = len;
     }
-    
+
+    /**
+     *
+     * Creates a F256Vector with the specified byte array as backing buffer.
+     *
+     * @param coordinates array that stores the coordinates of the vector
+     * @param offset offset at which the first coordinate can be found
+     * @param len number of coordinates
+     *
+     * @return a F256Vector backed by the specified array
+     */
+    public static F256Vector wrap(byte [] coordinates, int offset, int len) {
+        
+        F256Vector v = new F256Vector();        
+        v.coordinates = coordinates;
+        v.offset = offset;
+        v.len = len;
+
+        return v;
+    }
+
+
     /**
      * Returns the number of coordinates of the vector
      *

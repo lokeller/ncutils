@@ -56,7 +56,7 @@ public class F256CodedPacket {
      * coding vector of this packet is an elementary vector, i.e. all entries
      * but one, corresponding to the uncoded packet id, are zero.
      *
-     * @param packet the uncoded packet that will be put in the coded packet
+     * @param packet the uncoded packet that will be copied in the coded packet
      * @param maxPackets the maximal number of uncoded packets that can be combined
      * in this coded packet. This correspond to the length of teh coding vector.
      * @param ff The finite field that over which the vectors in the packet are
@@ -65,8 +65,29 @@ public class F256CodedPacket {
     public F256CodedPacket( UncodedPacket packet, int maxPackets) {
 
         codingVector = new F256Vector(maxPackets);
-        payloadVector = new F256Vector(packet.getPayload(), 0, packet.getPayload().length);        
+        payloadVector = new F256Vector(packet.getPayload(), 0, packet.getPayload().length);
         codingVector.coordinates[packet.getId()] = 1;
+    }
+
+    /**
+     *
+     * Creates a new coding vector containing an uncoded packet. This method
+     * reuses the backing buffer of the UncodedPacket and therefore the
+     * uncoded packet should be discarded.
+     *
+     * @param packet the uncoded packet that will be in the coded packet
+     * @param maxPackets the maximal number of uncoded packets that can be combined
+     * @return a F256CodedPacket containing the specified uncoded packet
+     */
+
+    public static F256CodedPacket wrap(UncodedPacket packet, int maxPackets) {
+
+        F256Vector cv = new F256Vector(maxPackets);
+        F256Vector pv = new F256Vector(packet.getPayload(), 0, packet.getPayload().length);
+        cv.coordinates[packet.getId()] = 1;
+
+        return new F256CodedPacket(cv, pv);
+
     }
 
     /**

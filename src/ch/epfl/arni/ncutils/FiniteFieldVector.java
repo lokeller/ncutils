@@ -50,7 +50,7 @@ public class FiniteFieldVector {
         coordinates = new int[length];
     }
 
-    public FiniteFieldVector(int [] coordinates, FiniteField ff) {
+    FiniteFieldVector(int [] coordinates, FiniteField ff) {
         this.ff = ff;
         this.coordinates = coordinates;
     }
