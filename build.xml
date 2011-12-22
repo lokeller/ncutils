@@ -1,12 +1,12 @@
 <project name="NCUtils" default="dist" basedir=".">
 
-	<property name="version" value="0.2.0"/>
+	<property name="version" value="0.1"/>
 	<property name="src" location="src/java" />
 	<property name="srcTests" location="test" />
 	<property name="build" location="build" />
 	<property name="buildTests" location="build-tests" />
 	<property name="srcJni" location="src/jni" />
-	<property name="outputJar" location="NCUtils.jar"/>
+	<property name="outputJar" location="NCUtilsCodec.jar"/>
 
 	<path id="junit.classpath">		
 		<fileset file="lib/junit-4.10.jar"/>
@@ -105,7 +105,7 @@
 
 	<target name="package" description="creates distribution package" depends="dist">
 		
-		<property name="zipdir" value="NCUtils-${version}"/>
+		<property name="zipdir" value="NCUtilsCodec-${version}"/>
 		
 		<mkdir dir="NCUtils-${version}"/>
 		
@@ -120,7 +120,7 @@
 			<fileset file="NCUtils.jar"/>
 		</copy>
 		
-		<zip destfile="NCUtils-${version}.zip">
+		<zip destfile="NCUtilsCodec-${version}.zip">
 			<fileset dir=".">
 				<include name="${zipdir}/**"/>
 			</fileset>			

@@ -5,7 +5,7 @@ Linux x86_64.
 To verify if native acceleration is available for your system you can
 run:
 
-java -cp dist/NCCodecs.jar ch.epfl.arni.ncutils.CodecFactory
+java -cp NCUtilsCodec.jar ch.epfl.arni.ncutils.CodecFactory
 
 To rebuild the sources use Ant (tested with version 1.8.2). To build the
 native libraries make, gcc (both for x86 and x86_64) and javah must be 
