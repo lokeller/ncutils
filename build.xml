@@ -1,0 +1,133 @@
+<project name="NCUtils" default="dist" basedir=".">
+
+	<property name="version" value="0.2.0"/>
+	<property name="src" location="src/java" />
+	<property name="srcTests" location="test" />
+	<property name="build" location="build" />
+	<property name="buildTests" location="build-tests" />
+	<property name="srcJni" location="src/jni" />
+	<property name="outputJar" location="NCUtils.jar"/>
+
+	<path id="junit.classpath">		
+		<fileset file="lib/junit-4.10.jar"/>
+		<fileset file="${outputJar}"/>
+	</path>
+
+	<target name="compile" description="compile the source ">
+		<mkdir dir="${build}" />
+		<javac srcdir="${src}" destdir="${build}" />
+	</target>
+
+	<target name="create-headers" depends="compile" description="creates c header files">
+
+		<javah destdir="${srcJni}" force="yes">
+			<class name="ch.epfl.arni.ncutils.impl.NativeEncoder" />
+			<class name="ch.epfl.arni.ncutils.impl.NativeDecoder" />
+			<classpath path="${build}" />
+		</javah>
+
+	</target>
+
+	<target name="compile-native-linux-32">
+		
+		<exec dir="${srcJni}" executable="/usr/bin/make">
+			<arg value="clean"/>
+		</exec>
+		<exec dir="${srcJni}" executable="/usr/bin/make">
+			<env key="CFLAGS" value="-m32" />
+		</exec>
+				
+		<mkdir dir="${build}/NATIVE/Linux/i386"/>
+		<copy file="${srcJni}/libncutils.so" tofile="${build}/NATIVE/Linux/i386/libncutils.so" failonerror="false"/>
+	</target>
+	
+	<target name="compile-native-linux-64">
+		
+		<exec dir="${srcJni}" executable="/usr/bin/make">
+			<arg value="clean"/>
+		</exec>
+		<exec dir="${srcJni}" executable="/usr/bin/make">
+			<env key="CFLAGS" value="-m64" />
+		</exec>
+		<mkdir dir="${build}/NATIVE/Linux/amd64"/>
+		<copy file="${srcJni}/libncutils.so" tofile="${build}/NATIVE/Linux/amd64/libncutils.so" failonerror="false" />
+		
+	</target>
+	
+	<target name="compile-native" depends="create-headers" description="creates native libraries">
+		
+		<mkdir dir="${build}/NATIVE/"/>
+		
+		<antcall target="compile-native-linux-32"/>
+		<antcall target="compile-native-linux-64"/>
+		
+	</target>
+
+	<target name="dist" depends="compile,compile-native" description="generate the distribution">
+		<jar jarfile="${outputJar}" basedir="${build}" />
+	</target>
+
+	<target name="compile-tests" depends="dist" description="compile the test cases ">
+		<mkdir dir="${buildTests}" />
+		<javac srcdir="${srcTests}" destdir="${buildTests}">
+			<classpath refid="junit.classpath" />
+		</javac>
+	</target>
+	
+	<target name="junit" depends="compile-tests" description="run tests cases">
+		<junit printsummary="yes" fork="yes" haltonfailure="yes">
+			<formatter type="plain" />
+			<batchtest haltonfailure="no">
+				<fileset dir="${srcTests}">
+					<include name="ch/epfl/arni/ncutils/impl/*Test*.java" />
+					<exclude name="**/AllTests.java" />
+				</fileset>
+			</batchtest>
+			<classpath refid="junit.classpath" />
+			<classpath path="${buildTests}" />
+		</junit>
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" />
+		<delete dir="${buildTests}" />
+
+		<delete>
+			<fileset dir="${srcJni}" includes="**/*.o" />
+			<fileset dir="${srcJni}" includes="**/*.so" />
+			<fileset dir="." includes="TEST-ch.epfl.arni.ncutils.impl.*.txt" />
+		</delete>
+
+		<delete file="${srcJni}/ch_epfl_arni_ncutils_impl_NativeDecoder.h" />
+		<delete file="${srcJni}/ch_epfl_arni_ncutils_impl_NativeEncoder.h" />
+
+	</target>
+
+	<target name="package" description="creates distribution package" depends="dist">
+		
+		<property name="zipdir" value="NCUtils-${version}"/>
+		
+		<mkdir dir="NCUtils-${version}"/>
+		
+		<copy todir="${zipdir}">
+			<fileset dir=".">
+				<include name="src/**"/>
+				<include name="examples/**"/>
+				<include name="test/**"/>
+			</fileset>
+			<fileset file="README"/> 
+			<fileset file="build.xml"/>
+			<fileset file="NCUtils.jar"/>
+		</copy>
+		
+		<zip destfile="NCUtils-${version}.zip">
+			<fileset dir=".">
+				<include name="${zipdir}/**"/>
+			</fileset>			
+		</zip>
+			
+		<delete dir="${zipdir}"/>
+		
+	</target>
+	
+</project>
