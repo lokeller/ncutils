@@ -158,6 +158,9 @@ int pd_add_packet(p_packet_decoder_t this, ffe* packet) {
     int innovative;
     int decodedBefore, decodedAfter;
 
+    if ( this->codingVectorDecoder->packetCount == this->codingVectorDecoder->maxPackets )
+    	return 0;
+
     decodedBefore = cvd_decoded_coordinates_get_count( this->codingVectorDecoder);
 
     innovative = cvd_add_vector(this->codingVectorDecoder, packet);    

@@ -67,6 +67,36 @@ public abstract class AbstractDecoderTest {
 		assertArrayEquals(segment, decodedSegment);
 		
 	}
+	
+	@Test
+	public void testTooManyPackets() {
+		
+		byte [] segment = new byte[20000];
+		
+		new Random().nextBytes(segment);
+		
+		Decoder decoder = createDecoder(segment.length, 20);
+		
+		Encoder encoder = createEncoder(segment, 0, segment.length, 20);
+		
+		while (!decoder.isDecoded()) {
+			byte [] packet = new byte[20 + segment.length / 20];
+			 
+			encoder.getPacket(packet, 0);
+	
+			decoder.addPacket(packet, 0);
+				
+		}
+		
+		for ( int i = 0; i < 1000; i++) {
+			byte [] packet = new byte[20 + segment.length / 20];
+			 
+			encoder.getPacket(packet, 0);
+	
+			decoder.addPacket(packet, 0);
+		}
+				
+	}
 
 	@Test
 	public void testOnlineCoding() {
