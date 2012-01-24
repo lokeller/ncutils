@@ -117,7 +117,7 @@
 			</fileset>
 			<fileset file="README"/> 
 			<fileset file="build.xml"/>
-			<fileset file="NCUtils.jar"/>
+			<fileset file="NCUtilsCodec.jar"/>
 		</copy>
 		
 		<zip destfile="NCUtilsCodec-${version}.zip">
