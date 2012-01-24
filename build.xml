@@ -1,6 +1,6 @@
 <project name="NCUtils" default="dist" basedir=".">
 
-	<property name="version" value="0.1"/>
+	<property name="version" value="0.1.1"/>
 	<property name="src" location="src/java" />
 	<property name="srcTests" location="test" />
 	<property name="build" location="build" />
