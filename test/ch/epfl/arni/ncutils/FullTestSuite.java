@@ -24,23 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package ch.epfl.arni.ncutils.f256;
+package ch.epfl.arni.ncutils;
 
-import ch.epfl.arni.ncutils.FiniteField;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * This class represents the finite field F_2^8
+ *
+ * @author lokeller
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ch.epfl.arni.ncutils.FiniteFieldVectorTest.class,
+                        ch.epfl.arni.ncutils.FiniteFieldTest.class,
+                        ch.epfl.arni.ncutils.CodingVectorDecoderTest.class,
+                        ch.epfl.arni.ncutils.UncodedPacketTest.class,
+                        ch.epfl.arni.ncutils.PacketDecoderTest.class,
+                        ch.epfl.arni.ncutils.CodedPacketTest.class,
+                        ch.epfl.arni.ncutils.FiniteFieldMatrixTest.class,
+                        ch.epfl.arni.ncutils.VectorSpaceTest.class})
+public class FullTestSuite {
 
-public class F256 {
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
 
-	private static FiniteField ff = new FiniteField(2, 8);
-	
-	public static FiniteField getF256() {
-		return ff;
-	}
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
 
-	
-	
-	
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
 }

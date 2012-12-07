@@ -1,30 +1,30 @@
-/*
- * Copyright (c) 2010, EPFL - ARNI
+/*******************************************************************************
+ * Copyright (c) 2012, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the EPFL nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-package ch.epfl.arni.ncutils.impl;
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the EPFL nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+package ch.epfl.arni.ncutils;
 
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
@@ -82,7 +82,6 @@ public class CodingVectorDecoderTest {
 
 
     }
-
 
     int size = 10;
     FiniteField ff = FiniteField.getDefaultFiniteField();
@@ -205,7 +204,7 @@ public class CodingVectorDecoderTest {
         }
         for (int i = 0; i < size; i++) {
             try {
-                Map<Integer, FiniteFieldVector> dd = d.addVector(vectors[i]);
+                d.addVector(vectors[i]);
                 assertTrue( i == 0 );
             } catch (LinearDependantException ex) {
             }
@@ -245,5 +244,60 @@ public class CodingVectorDecoderTest {
 
         checkInverse(vectors, inverse, size);
     }
+     
+     @Test
+     public void testSubspaceSize() {
+      
+      	CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
+      	       
+         for (int i = 0; i < size; i++) {
+             FiniteFieldVector v = new FiniteFieldVector(size, ff);
+             v.setCoordinate(i, 1);
+             
+             try {
+             	d.addVector(v);
+             } catch (Exception e) {
+ 				fail();
+ 			}
+             
+             assertEquals(i + 1, d.getSubspaceSize());
+         }
+      	        	
+     }
+    
+    @Test
+    public void testTooManyPackets() {
+     
+     	CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
+     	       
+        for (int i = 0; i < size; i++) {
+            FiniteFieldVector v = new FiniteFieldVector(size, ff);
+            v.setCoordinate(i, 1);
+            
+            try {
+            	d.addVector(v);
+            } catch (Exception e) {
+				fail();
+			}
+        }
+     	
+        FiniteFieldVector v = new FiniteFieldVector(size, ff);
+        
+        try {
+        	d.addVector(v);
+        	fail();
+        } catch (LinearDependantException e) {}
+             	
+    }
+     
+    @Test
+    public void testMaxPackets() {
+    
+    	CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
+    	
+    	assertEquals(size, d.getMaxPackets());
+    	
+    }
+     
 
 }

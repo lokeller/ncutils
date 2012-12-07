@@ -1,29 +1,29 @@
-/*
- * Copyright (c) 2010, EPFL - ARNI
+/*******************************************************************************
+ * Copyright (c) 2012, EPFL - ARNI
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the EPFL nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the EPFL nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *  
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
 
 package ch.epfl.arni.ncutils;
 
@@ -87,7 +87,7 @@ public class CodedPacket {
      * Creates a coded packet from its binary representation.
      *
      * @param maxPackets the maximal number of uncoded packets that can be combined
-     * in this coded packet. This correspond to the length of teh coding vector.
+     * in this coded packet. This correspond to the length of the coding vector.
      * 
      * @param data an array containing the binary representation of the coded packet
      * @param offset the first byte of the binary representation in the array data
@@ -159,9 +159,7 @@ public class CodedPacket {
      * @param index the index of the coordinate that must be set
      * @param value an element of the field over which the packet is defined
      */
-    public void setCoordinate(int index, int value) {
-        assert( index >= 0);
-        assert(value < getFiniteField().getCardinality() && value >= 0);
+    public void setCoordinate(int index, int value) {        
         if ( index < codingVector.getLength()) {
             codingVector.setCoordinate(index, value);
         } else {
@@ -180,8 +178,6 @@ public class CodedPacket {
      * @return the value of the coordinate, an element of the field over which the packet is defined
      */
     public int getCoordinate(int index) {
-
-        assert(index >= 0);
 
         if ( index < codingVector.getLength()) {
             return codingVector.getCoordinate(index);
@@ -221,9 +217,7 @@ public class CodedPacket {
      * @param vector the CodedPacket that will be summed
      * @return the sum of this and vector
      */
-    public CodedPacket add(CodedPacket vector) {
-        assert(vector.getFiniteField() == getFiniteField());
-
+    public CodedPacket add(CodedPacket vector) {        
         return new CodedPacket(codingVector.add(vector.codingVector), payloadVector.add(vector.payloadVector));
 
     }
@@ -255,8 +249,6 @@ public class CodedPacket {
      * of the current packet will be multiplied by c.
      */
     public CodedPacket scalarMultiply(int c) {
-        assert(c < getFiniteField().getCardinality() && c >= 0);
-
         return new CodedPacket(codingVector.scalarMultiply(c), payloadVector.scalarMultiply(c));
         
     }
@@ -272,7 +264,7 @@ public class CodedPacket {
     
     public void scalarMultiplyInPlace(int c) {        
     	codingVector.scalarMultiplyInPlace(c);
-    	payloadVector.scalarMultiply(c);
+    	payloadVector.scalarMultiplyInPlace(c);
     }
     
     
@@ -293,8 +285,6 @@ public class CodedPacket {
     * coordinate of packet multiplied by c 
     */
     public CodedPacket multiplyAndAdd(int c, CodedPacket packet) {
-        assert(packet.getFiniteField() == getFiniteField());
-
         return new CodedPacket(codingVector.multiplyAndAdd(c, packet.codingVector), payloadVector.multiplyAndAdd(c, packet.payloadVector));
 
     }

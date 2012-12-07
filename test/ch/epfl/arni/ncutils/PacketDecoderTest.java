@@ -24,36 +24,31 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package examples;
+package ch.epfl.arni.ncutils;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.Vector;
+
+import org.junit.Test;
 
 import ch.epfl.arni.ncutils.CodedPacket;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.PacketDecoder;
 import ch.epfl.arni.ncutils.UncodedPacket;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Vector;
 
-/**
- *
- * This example shows how to use ncutils to build simulate
- * random network coding network. Uncoded packets are first
- * created then they are transformed to the corresponding coded
- * packets. These are linearly combined (as a network would) in
- * new coded packets. The resulting packets are finally decoded
- * with the packet decoder.
- *
- * @author lokeller
- */
-public class BlockLevelExample {
+public class PacketDecoderTest {
 
-    public static void main(String [] args) {
-
+	@Test
+	public void testDecoder() {
+		
         FiniteField ff = FiniteField.getDefaultFiniteField();
 
         int blockNumber = 10;
         int payloadLen = 10;
-        int payloadLenCoeffs = 20;
 
         /* create the uncoded packets */
         UncodedPacket[] inputPackets = new UncodedPacket[blockNumber];
@@ -62,20 +57,14 @@ public class BlockLevelExample {
             Arrays.fill(payload, (byte) (0XA0 +  i));
             inputPackets[i] = new UncodedPacket(i, payload);
         }
-
-        System.out.println(" Input blocks: ");
-        printUncodedPackets(Arrays.asList(inputPackets), payloadLen);
-
+        
         /* prepare the input packets to be sent on the network */
         CodedPacket[] codewords = new CodedPacket[blockNumber];
 
         for ( int i = 0 ; i < blockNumber ; i++) {
             codewords[i] = new CodedPacket( inputPackets[i], blockNumber, ff);
         }
-
-        System.out.println(" Codewords: ");
-        printCodedPackets(Arrays.asList(codewords), payloadLenCoeffs);
-
+        
         /* create a set of linear combinations that simulate
          * the output of the network
          */
@@ -96,30 +85,43 @@ public class BlockLevelExample {
             }
         }
 
-        System.out.println(" Network output: ");
-        printCodedPackets(Arrays.asList(networkOutput), payloadLenCoeffs);
-
         /* decode the received packets */
         PacketDecoder decoder = new PacketDecoder(ff, blockNumber, payloadLen);
 
-        System.out.println(" Decoded packets: ");
+        assertEquals(blockNumber, decoder.getMaxPackets());
+        
+        ArrayList<UncodedPacket> uncoded = new ArrayList<UncodedPacket>();
+        
         for ( int i = 0; i < blockNumber ; i++) {
             Vector<UncodedPacket> packets = decoder.addPacket(networkOutput[i]);
-            printUncodedPackets(packets, payloadLen);
+            
+            assertEquals(i+1, decoder.getSubspaceSize());
+            
+            uncoded.addAll(packets);
         }
+        
+        assertEquals(0, decoder.addPacket(networkOutput[0]).size());
 
-    }
-
-    private static void printUncodedPackets(Iterable<UncodedPacket> packets, int payloadLen) {
-        for (UncodedPacket p : packets) {            
-            System.out.println(p);
+        assertEquals(uncoded.size(), blockNumber);
+        
+        boolean decoded [] = new boolean[blockNumber]; 
+        
+        for ( UncodedPacket packet : uncoded ) {
+        	
+        	assertFalse(decoded[packet.getId()]);
+        	
+        	decoded[packet.getId()] = true;
+        	
+        	assertArrayEquals(packet.getPayload(), inputPackets[packet.getId()].getPayload());
+        	
         }
-    }
-
-    private static void printCodedPackets(Iterable<CodedPacket> packets, int payloadLen) {
-        for (CodedPacket p : packets) {
-            System.out.println(p);
+        
+        for (int i = 0 ; i < blockNumber ; i++) {
+        	assertEquals(decoder.getCodedPackets().get(i), networkOutput[i]);
         }
-    }
+        
+		
+	}
+
 
 }
