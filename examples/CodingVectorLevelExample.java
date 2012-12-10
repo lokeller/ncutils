@@ -24,7 +24,6 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-package examples;
 
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
