@@ -406,5 +406,21 @@ public class MatrixTest {
 				
 	}
 	
+	@Test
+	public void testCopyNullSpace() {
+		
+		Matrix matrix2 = Matrix.createRandomMatrix(5, 20, FiniteField.getDefaultFiniteField(), 1234);
+		
+		VectorSpace v = matrix2.copyNullSpace();
+		
+		assertEquals(20, v.getDimension() + matrix2.copyRowSpace().getDimension());
+		
+		for ( Vector v2: v.getBase()) {
+			Matrix matrix3 = new Matrix(0,0, FiniteField.getDefaultFiniteField());
+			matrix3.appendColumn(v2);
+			assertTrue(matrix2.multiply(matrix3).isZero());
+		}
+		
+	}
 
 }

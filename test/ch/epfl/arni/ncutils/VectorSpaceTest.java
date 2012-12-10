@@ -100,7 +100,7 @@ public class VectorSpaceTest {
 		
 		VectorSpace space = matrix.copyRowSpace();
 		
-		VectorSpace complementSpace = space.getComplement();
+		VectorSpace complementSpace = space.getOrthogonalComplement();
 				
 		assertEquals(15, space.getDimension());
 		assertEquals(5, complementSpace.getDimension());

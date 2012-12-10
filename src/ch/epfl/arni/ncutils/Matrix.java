@@ -26,6 +26,8 @@
  *******************************************************************************/
 package ch.epfl.arni.ncutils;
 
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
@@ -172,6 +174,30 @@ public class Matrix {
 		rows++;
 	}
 	
+	/**
+	 * 
+	 * Appends the specified matrix as a new rows at the bottom of the matrix
+	 * 
+	 * @param m a matrix over the same finite field as this matrix
+	 */
+	public void appendMatrixBelow(Matrix m) {
+		for ( int i = 0 ; i < m.rows; i++) {
+			appendRow(Vector.wrap(m.entries[i], m.ff));
+		}
+	}
+	
+	/**
+	 * 
+	 * Appends the specified matrix as a new columns at the left of the matrix
+	 * 
+	 * @param m a matrix over the same finite field as this matrix
+	 */
+	public void appendMatrixRight(Matrix m) {
+		for ( int i = 0 ; i < m.columns; i++) {
+			appendColumn(m.copyColumn(i));
+		}
+	}
+	
 
 	/**
 	 * 
@@ -179,7 +205,13 @@ public class Matrix {
 	 * 
 	 * @param v a vector from the finite field of this matrix
 	 */
-	public void appendColumn(Vector v) {
+	public void appendColumn(Vector v) {		
+		
+		if (rows == 0) {
+			entries = new int[v.getLength()][0];
+			rows = v.getLength();
+		}
+		
 		int [][] newEntries = new int[rows][columns+1];
 		
 		for ( int i = 0 ; i < entries.length ; i++) {
@@ -193,6 +225,8 @@ public class Matrix {
 		}
 		
 		columns++;
+		
+		
 	}
 	
 	/**
@@ -261,6 +295,8 @@ public class Matrix {
 	 * @return a matrix that is equal to this matrix times other matrix
 	 */
 	public Matrix multiply(Matrix other) {
+		
+		if ( other.rows != columns) throw new IllegalArgumentException("Invalid matrix size, expected " + columns + " rows, found " + other.rows);
 		
 		Matrix output = new Matrix(this.rows, other.columns, ff);
 		
@@ -542,6 +578,30 @@ public class Matrix {
 	}
 
 	/**
+	 * Computes the null space of the matrix
+	 * 
+	 * @return a the null space of the matrix
+	 */
+	public VectorSpace copyNullSpace() {
+		
+		Matrix m2 = copy();		
+		m2.appendMatrixBelow(createIdentityMatrix(columns, ff));
+		
+		Matrix m3 = m2.toTranspose().toRowEchelonForm().toTranspose();
+		
+		ArrayList<Vector> base = new ArrayList<Vector>(); 
+		
+		for ( int i = 0 ; i < columns; i++) {
+			if ( m3.copySubMatrix(0, i, rows - 1, i).isZero()) {
+				base.add(m3.copySubMatrix(rows, i, rows + columns - 1, i).copyColumn(0));
+			}
+		}
+		
+		return new VectorSpace(ff, columns, base.toArray(new Vector[0]));
+		
+	}
+	
+	/**
 	 * 
 	 * Returns the column space of this matrix. The returned space will not change when the matrix
 	 * is changed.
@@ -575,7 +635,7 @@ public class Matrix {
 	public Vector copyColumn(int column) {
 		return Vector.wrap(toTranspose().entries[column], ff).copy();
 	}
-
+	
 	/**
 	 * Returns a slice of this matrix.
 	 * 

@@ -102,32 +102,14 @@ public class VectorSpace {
 	}
 	
 	/**
-	 * Returns the complement of this vector space, i.e. a vector space
-	 * that shares only the zero vector with this space that has a base
-	 * that combined with the base of this subspace spans the whole space
-	 * FiniteField ^ vectorLength .   
+	 * Returns the orthogonal complement of this vector space.   
 	 * 
-	 * @return the complement of this vector space
+	 * @return the orthogonal complement of this vector space
 	 */
-	public VectorSpace getComplement() {
+	public VectorSpace getOrthogonalComplement() {
 		
-		CodingVectorDecoder decoder2 = decoder.copy();		
-
-		ArrayList<Vector> complementaryBase = new ArrayList<Vector>();
-		
-		for ( int i = 0 ; i < baseMatrix.getColumnCount() ; i++) {
-			
-			Vector v = new Vector(baseMatrix.getColumnCount(), baseMatrix.getFiniteField());			
-			v.setCoordinate(i, 1);
-			
-			if ( decoder2.addVector(v) != null) {
-				complementaryBase.add(v);
-			}			
-			
-		}
-		
-		return new VectorSpace(baseMatrix.getFiniteField(), baseMatrix.getColumnCount(), complementaryBase.toArray(new Vector[0]));
-		
+		return baseMatrix.copyNullSpace();
+				
 	}
 	
 	
@@ -170,39 +152,44 @@ public class VectorSpace {
 	 */
 	public VectorSpace getIntersection(VectorSpace other) {
 		
-		// create a new base of the whole space		
-		VectorSpace complement = getComplement();
+		if ( !baseMatrix.ff.equals(other.baseMatrix.ff) ||
+				baseMatrix.columns != other.baseMatrix.columns) 
+			throw new IllegalArgumentException("Cannot intersect vector spaces with different type of vectors");
 		
-		Matrix spaceBase = complement.baseMatrix.copy();
+		Matrix B = baseMatrix.toTranspose();
+		Matrix C = other.baseMatrix.toTranspose();
 		
-		for ( int i = 0; i < baseMatrix.getRowCount() ; i++) {	
-			spaceBase.appendRow(baseMatrix.copyRow(i));
+		Matrix minusI1 = Matrix.createIdentityMatrix(B.rows, B.ff).scalarMultiply(B.ff.sub[0][1]); 
+		Matrix minusI2 = Matrix.createIdentityMatrix(C.rows, C.ff).scalarMultiply(B.ff.sub[0][1]);
+		
+		Matrix zeros1 = new Matrix(B.rows, C.columns, B.ff);
+		Matrix zeros2 = new Matrix(C.rows, B.columns, B.ff);
+		
+		Matrix T1 = B.copy();
+		T1.appendMatrixRight(zeros1);
+		T1.appendMatrixRight(minusI1);
+		
+		Matrix T2 = zeros2.copy();
+		T2.appendMatrixRight(C);
+		T2.appendMatrixRight(minusI2);
+		
+		Matrix T = T1.copy();
+		T.appendMatrixBelow(T2);
+		
+		VectorSpace nullSpace = T.copyNullSpace();
+				
+		Matrix b2 = nullSpace.baseMatrix.copySubMatrix(0, 
+														B.columns + C.columns, 
+														nullSpace.baseMatrix.rows - 1, 
+														nullSpace.baseMatrix.columns - 1);
+		
+		ArrayList<Vector> base = new ArrayList<Vector>();		
+		
+		for ( int i = 0 ; i < b2.rows; i++) {
+			base.add(b2.copyRow(i));
 		}
 		
-		// find the matrix that is used to do a change of base
-		Matrix changeOfBase = spaceBase.toTranspose().toInverse();
-		
-		// express the basis vector of the second space in terms of this new base
-		Matrix otherBase = changeOfBase.multiply(other.baseMatrix.toTranspose()).toTranspose();
-		
-		// find the row echelon form and identify the rows that are linear combinations of our base
-		otherBase = otherBase.toRowEchelonForm();
-		
-		int complementDimensions = complement.getDimension(); 
-		
-		Matrix intersectionBase = otherBase;
-				
-		outer : for ( int i = 0; i < otherBase.rows ; i++) {
-			for ( int j = 0 ; j < complementDimensions; j++) {
-				if ( otherBase.entries[otherBase.rows - i - 1][j] != 0) {
-					intersectionBase = otherBase.copySubMatrix(otherBase.rows - (i-1) - 1, 0, otherBase.rows - 1, otherBase.columns - 1);
-					break outer;
-				}
-			}
-		}		
-		
-		return spaceBase.toTranspose().multiply(intersectionBase.toTranspose()).toTranspose().copyRowSpace();		
-		
+		return new VectorSpace(baseMatrix.ff, baseMatrix.columns, base.toArray(new Vector[0]));
 	}
 
 	/**
