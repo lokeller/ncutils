@@ -26,13 +26,14 @@
  *******************************************************************************/
 package examples;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import ch.epfl.arni.ncutils.CodedPacket;
 import ch.epfl.arni.ncutils.FiniteField;
 import ch.epfl.arni.ncutils.PacketDecoder;
 import ch.epfl.arni.ncutils.UncodedPacket;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  *
@@ -104,7 +105,7 @@ public class BlockLevelExample {
 
         System.out.println(" Decoded packets: ");
         for ( int i = 0; i < blockNumber ; i++) {
-            Vector<UncodedPacket> packets = decoder.addPacket(networkOutput[i]);
+            List<UncodedPacket> packets = decoder.addPacket(networkOutput[i]);
             printUncodedPackets(packets, payloadLen);
         }
 

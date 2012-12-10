@@ -28,128 +28,169 @@ package ch.epfl.arni.ncutils;
 
 import java.util.ArrayList;
 
-public class VectorSpace {
+/**
+ * Represents a vector space spanned by a set of vectors. A VectorSpace is immutable.
+ * 
+ * @author lokeller
+ *
+ */
 
-	private FiniteFieldVector[] base;
+public class VectorSpace {
+	
+	
+	/** a decoder that has been initialized with the basis vectors */
 	private CodingVectorDecoder decoder;
-	private FiniteFieldMatrix baseMatrix;
 	
-	private int vectorLen; 
-	private FiniteField ff;	
+	/** the rows of this matrix are a base of the vector space.
+	 *  This matrix has been initialized with the reduced row echelon form of the 
+	 *  matrix whose rows are the basis vectors.
+	 */
+	private Matrix baseMatrix;	
 	
-	public VectorSpace(int vectorLen, FiniteFieldVector[] base, FiniteField ff) {
+	/**
+	 * Creates a new vector space with the specified base
+	 * 
+	 * @param ff the finite field to which the base entries belong
+	 * @param vectorLen the length of the base vectors 
+	 * @param base the base vectors
+	 */
+	public VectorSpace(FiniteField ff, int vectorLen, Vector[] base) {
 		
-		if ( ff == null) throw new IllegalArgumentException("Finite field cannot be null");
+		if ( ff == null) throw new IllegalArgumentException("Finite field cannot be null");		
 		
-		this.vectorLen = vectorLen;
-		this.ff = ff;
-		
-		ArrayList<FiniteFieldVector> list = new ArrayList<FiniteFieldVector>();
+		ArrayList<Vector> list = new ArrayList<Vector>();
 		
 		decoder = new CodingVectorDecoder(vectorLen, ff);
 		
-		baseMatrix = new FiniteFieldMatrix(0, vectorLen, ff);
+		baseMatrix = new Matrix(0, vectorLen, ff);
 		
-		for ( FiniteFieldVector v : base) {
-			try {				
-				decoder.addVector(v);				
+		for ( Vector v : base) {			
+			if ( decoder.addVector(v) != null) {				
 				list.add(v.copy());
 				baseMatrix.appendRow(v);
-			} catch ( LinearDependantException e) {}
+			}			
 		}		
 		
 		this.baseMatrix = baseMatrix.toReducedRowEchelonForm();
 		
-		this.base = list.toArray(new FiniteFieldVector[0]);
-		
 	}
 	
+	/**
+	 * Returns the dimension of this vector space
+	 * 
+	 * @return the dimension of the space
+	 */
 	public int getDimension() {
 		return decoder.getSubspaceSize();
 	}
 	
-	public boolean isZero() {
-		return baseMatrix.rows == 0;
-	}
-	
-	public FiniteFieldVector[] getBase() {
+	/**
+	 * 
+	 * Returns a base for this vector space
+	 * 
+	 * @return a base of the subspace
+	 */
+	public Vector[] getBase() {
+		
+		Vector[] base = new Vector[baseMatrix.getRowCount()];
+		
+		for ( int i = 0; i < baseMatrix.getRowCount() ; i++) {
+			base[i] = baseMatrix.copyRow(i);
+		}
+		
 		return base;
 	}
 	
+	/**
+	 * Returns the complement of this vector space, i.e. a vector space
+	 * that shares only the zero vector with this space that has a base
+	 * that combined with the base of this subspace spans the whole space
+	 * FiniteField ^ vectorLength .   
+	 * 
+	 * @return the complement of this vector space
+	 */
 	public VectorSpace getComplement() {
 		
-		CodingVectorDecoder decoder = new CodingVectorDecoder(vectorLen, ff);
-		
-		for (FiniteFieldVector v : base) {
-			try {
-				decoder.addVector(v);
-			} catch (LinearDependantException e) {}
-		}
+		CodingVectorDecoder decoder2 = decoder.copy();		
 
-		ArrayList<FiniteFieldVector> complementaryBase = new ArrayList<FiniteFieldVector>();
+		ArrayList<Vector> complementaryBase = new ArrayList<Vector>();
 		
-		for ( int i = 0 ; i < vectorLen ; i++) {
+		for ( int i = 0 ; i < baseMatrix.getColumnCount() ; i++) {
 			
-			FiniteFieldVector v = new FiniteFieldVector(vectorLen, ff);			
+			Vector v = new Vector(baseMatrix.getColumnCount(), baseMatrix.getFiniteField());			
 			v.setCoordinate(i, 1);
 			
-			try {
-				decoder.addVector(v);
+			if ( decoder2.addVector(v) != null) {
 				complementaryBase.add(v);
-			} catch (LinearDependantException ex) {}
+			}			
 			
 		}
 		
-		return new VectorSpace(vectorLen, complementaryBase.toArray(new FiniteFieldVector[0]), ff);
+		return new VectorSpace(baseMatrix.getFiniteField(), baseMatrix.getColumnCount(), complementaryBase.toArray(new Vector[0]));
 		
 	}
 	
+	
+	/**
+	 * Returns a vector space that contains only the linear combinations of vectors
+	 * in this space and in the another space. 
+	 * 
+	 * @param other another vector space
+	 * 
+	 * @return the sum of the two subspaces
+	 */
 	public VectorSpace getSum(VectorSpace other) {
 		
-		ArrayList<FiniteFieldVector> sumBase = new ArrayList<FiniteFieldVector>();
+		ArrayList<Vector> sumBase = new ArrayList<Vector>();
 		
-		CodingVectorDecoder decoder = new CodingVectorDecoder(vectorLen, ff);
+		CodingVectorDecoder decoder2 = decoder.copy();
 		
-		for (FiniteFieldVector v : base) {
-			try {
-				decoder.addVector(v);
-				sumBase.add(v);
-			} catch (LinearDependantException e) {}
+		for ( int i = 0; i < baseMatrix.getRowCount() ; i++) {			
+			sumBase.add(baseMatrix.copyRow(i));						
 		}
 
-		for (FiniteFieldVector v : other.base) {
-			try {
-				decoder.addVector(v);
+		for ( int i = 0; i < other.baseMatrix.getRowCount() ; i++) {	
+			Vector v = other.baseMatrix.copyRow(i);
+			if ( decoder2.addVector(v) != null) {				
 				sumBase.add(v);
-			} catch (LinearDependantException e) {}
+			}			
 		}
 		
-		return new VectorSpace(vectorLen, sumBase.toArray(new FiniteFieldVector[0]), ff);
+		return new VectorSpace(baseMatrix.getFiniteField(), baseMatrix.getColumnCount(), sumBase.toArray(new Vector[0]));
 	}
 	
+	
+	/**
+	 * Returns the intersection between this vector space and another vector space.
+	 * 
+	 * @param other another vector space
+	 * 
+	 * @return the vector space containing all the vectors that belong both to this vector
+	 * space and other
+	 */
 	public VectorSpace getIntersection(VectorSpace other) {
 		
 		// create a new base of the whole space		
 		VectorSpace complement = getComplement();
 		
-		FiniteFieldMatrix spaceBase = complement.baseMatrix.copy();
+		Matrix spaceBase = complement.baseMatrix.copy();
 		
-		for ( FiniteFieldVector v : base) {
-			spaceBase.appendRow(v);
+		for ( int i = 0; i < baseMatrix.getRowCount() ; i++) {	
+			spaceBase.appendRow(baseMatrix.copyRow(i));
 		}
 		
 		// find the matrix that is used to do a change of base
-		FiniteFieldMatrix changeOfBase = spaceBase.getTranspose().getInverse();
+		Matrix changeOfBase = spaceBase.toTranspose().toInverse();
 		
 		// express the basis vector of the second space in terms of this new base
-		FiniteFieldMatrix otherBase = changeOfBase.multiply(other.baseMatrix.getTranspose()).getTranspose();
+		Matrix otherBase = changeOfBase.multiply(other.baseMatrix.toTranspose()).toTranspose();
 		
 		// find the row echelon form and identify the rows that are linear combinations of our base
 		otherBase = otherBase.toRowEchelonForm();
 		
 		int complementDimensions = complement.getDimension(); 
 		
-		FiniteFieldMatrix intersectionBase = otherBase;
+		Matrix intersectionBase = otherBase;
 				
 		outer : for ( int i = 0; i < otherBase.rows ; i++) {
 			for ( int j = 0 ; j < complementDimensions; j++) {
@@ -160,50 +201,58 @@ public class VectorSpace {
 			}
 		}		
 		
-		return spaceBase.getTranspose().multiply(intersectionBase.getTranspose()).getTranspose().copyRowSpace();		
+		return spaceBase.toTranspose().multiply(intersectionBase.toTranspose()).toTranspose().copyRowSpace();		
 		
 	}
 
-	public boolean contains(FiniteFieldVector v) {		
-		try {
-			decoder.copy().addVector(v);
-			return false;
-		} catch (LinearDependantException e) {
-			return true;
-		}
+	/**
+	 * Returns true if the vector v is contained in this vector space
+	 * 
+	 * @param v a vector
+	 * 
+	 * @return true if the vector is contained in this space, false otherwise
+	 */
+	public boolean contains(Vector v) {		
+		
+		return decoder.copy().addVector(v) == null;
 	}
 	
+	/**
+	 * Returns true if the given vector space is a subspace of this vector space
+	 * 
+	 * @param other another subspace
+	 * 
+	 * @return true if other is a subspace, false otherwise
+	 */
 	public boolean contains(VectorSpace other) {
 		
 		if ( other.getDimension() > getDimension()) return false;
 		
 		CodingVectorDecoder newDecoder = this.decoder.copy(); 
 		
-		for ( FiniteFieldVector v : other.base) {
-			try {
-				newDecoder.addVector(v);
+		for ( int i = 0; i < other.baseMatrix.getRowCount() ; i++) {	
+			if ( newDecoder.addVector(other.baseMatrix.copyRow(i)) != null) {
 				return false;
-			} catch (LinearDependantException e) {}	
+			}
 		}
 		
 		return true;
 		
 	}
 	
+	/**
+	 * 
+	 * Returns true if this subspace contains only the zero element
+	 * 
+	 * @return true if this is the zero space, false otherwise
+	 */
+	public boolean isZero() {
+		return baseMatrix.rows == 0;
+	}
+
 	@Override
-	public int hashCode() {
-		
-		int prime = 31;
-		int result = ff.hashCode();
-		
-		for ( int i = 0 ; i < baseMatrix.rows; i++) {
-			for ( int j = 0 ; j < baseMatrix.columns; j++) {
-				result += prime * result + baseMatrix.entries[i][j];
-			}
-		}
-		
-		return result;
-		
+	public int hashCode() {				
+		return baseMatrix.hashCode();		
 	}
 	
 	@Override
@@ -213,13 +262,9 @@ public class VectorSpace {
 		
 		if ( !( other instanceof VectorSpace) ) return false;
 		
-		VectorSpace otherSubspace = (VectorSpace) other;
-		
-		if ( !otherSubspace.ff.equals(ff)) return false;
-		
-		if ( otherSubspace.getDimension() != getDimension()) return false;
-		
-		if ( otherSubspace.contains(this)) return true;
+		VectorSpace otherSubspace = (VectorSpace) other;		
+				
+		if ( otherSubspace.baseMatrix.equals(this.baseMatrix)) return true;
 		
 		return false;
 		

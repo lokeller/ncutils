@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.FiniteFieldVector;
+import ch.epfl.arni.ncutils.Vector;
 import ch.epfl.arni.ncutils.UncodedPacket;
 
 public class UncodedPacketTest {
@@ -82,7 +82,7 @@ public class UncodedPacketTest {
 		
 		FiniteField ff = new FiniteField(2, 4);
 		
-		FiniteFieldVector v  = FiniteFieldVector.wrap(payload, ff);
+		Vector v  = Vector.wrap(payload, ff);
 		
 		UncodedPacket packet = new UncodedPacket(id, v);
 		

@@ -42,8 +42,8 @@ package ch.epfl.arni.ncutils;
  */
 public class CodedPacket {
     
-    private FiniteFieldVector codingVector;
-    private FiniteFieldVector payloadVector;
+    private Vector codingVector;
+    private Vector payloadVector;
 
     /**
      *
@@ -59,7 +59,7 @@ public class CodedPacket {
      */
     public CodedPacket( UncodedPacket packet, int maxPackets, FiniteField ff) {
 
-        this( new FiniteFieldVector(maxPackets, ff), ff.byteToVector(packet.getPayload()));
+        this( new Vector(maxPackets, ff), ff.byteToVector(packet.getPayload()));
 
         codingVector.coordinates[packet.getId()] = 1;
     }
@@ -78,8 +78,8 @@ public class CodedPacket {
      */
     public CodedPacket(int maxPackets, int payloadByteLen, FiniteField ff) {
 
-        this( new FiniteFieldVector(maxPackets, ff),
-                new FiniteFieldVector(ff.coordinatesCount(payloadByteLen), ff));
+        this( new Vector(maxPackets, ff),
+                new Vector(ff.coordinatesCount(payloadByteLen), ff));
         
     }
 
@@ -105,7 +105,7 @@ public class CodedPacket {
         
     }
     
-    private CodedPacket(FiniteFieldVector codingVector, FiniteFieldVector payloadVector) {
+    private CodedPacket(Vector codingVector, Vector payloadVector) {
         this.codingVector = codingVector;
         this.payloadVector = payloadVector;
     }
@@ -119,7 +119,7 @@ public class CodedPacket {
      *
      * @return the coding vector of this packet
      */
-    public FiniteFieldVector getCodingVector() {
+    public Vector getCodingVector() {
        return codingVector;
     }
 
@@ -132,7 +132,7 @@ public class CodedPacket {
      *
      * @return the payload vector of this packet
      */
-    public FiniteFieldVector getPayload() {
+    public Vector getPayload() {
         return payloadVector;
     }
 

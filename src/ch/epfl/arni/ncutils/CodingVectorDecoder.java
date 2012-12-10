@@ -111,18 +111,15 @@ public class CodingVectorDecoder {
 	 *            a coding vector of length compatible with the decoder
 	 * @return a map that associates an id of an uncoded packet with a vector
 	 *         containing the coefficients that must be used to recover its
-	 *         payload
+	 *         payload, null if the vector being added is linearly dependant from
+	 *         the others already added
 	 * 
-	 * @throws LinearDependantException
-	 *             the vector being added is linearly dependant from the
-	 *             previously decoded vectors.
 	 */
-	public Map<Integer, FiniteFieldVector> addVector(FiniteFieldVector v)
-			throws LinearDependantException {
+	public Map<Integer, Vector> addVector(Vector v) {
 
 		/* if the matrix is already full rank don't add this vector */
 		if (packetCount == decodeMatrix.length) {
-			throw new LinearDependantException();
+			return null;
 		}
 
 		final int[][] mul = ff.mul;
@@ -179,8 +176,7 @@ public class CodingVectorDecoder {
 		/* if the packet is not li stop here */
 
 		if (pivot == -1) {
-
-			throw new LinearDependantException();
+			return null;
 		}
 
 		/* divide the line */
@@ -218,7 +214,7 @@ public class CodingVectorDecoder {
 
 		/* look for decodable blocks */
 
-		HashMap<Integer, FiniteFieldVector> willDecode = new HashMap<Integer, FiniteFieldVector>();
+		HashMap<Integer, Vector> willDecode = new HashMap<Integer, Vector>();
 
 		for (int i = 0; i < packetCount; i++) {
 			int pos = -1;
@@ -240,7 +236,7 @@ public class CodingVectorDecoder {
 				decoded[i] = true;
 
 				/* build the vector that explains how to obtain the block */
-				FiniteFieldVector vector = new FiniteFieldVector(
+				Vector vector = new Vector(
 						decodeMatrix.length, ff);
 				int[] coordinates = vector.coordinates;
 				for (int j = size; j < size + size; j++) {

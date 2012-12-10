@@ -30,8 +30,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import org.junit.Test;
 
@@ -93,7 +93,7 @@ public class PacketDecoderTest {
         ArrayList<UncodedPacket> uncoded = new ArrayList<UncodedPacket>();
         
         for ( int i = 0; i < blockNumber ; i++) {
-            Vector<UncodedPacket> packets = decoder.addPacket(networkOutput[i]);
+            List<UncodedPacket> packets = decoder.addPacket(networkOutput[i]);
             
             assertEquals(i+1, decoder.getSubspaceSize());
             

@@ -26,9 +26,9 @@
  *******************************************************************************/
 package ch.epfl.arni.ncutils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 
 /**
@@ -40,7 +40,7 @@ import java.util.Vector;
  */
 public class PacketDecoder {
 
-    private Vector<CodedPacket> packets = new Vector<CodedPacket>();
+    private ArrayList<CodedPacket> packets = new ArrayList<CodedPacket>();
 
     private CodingVectorDecoder codingVectorDecoder;
 
@@ -72,41 +72,38 @@ public class PacketDecoder {
      * @return a vector of uncoded packets that have been decoded thanks to this
      * coded packet (and what was previously added)
      */
-    public Vector<UncodedPacket> addPacket(CodedPacket p) {
+    public List<UncodedPacket> addPacket(CodedPacket p) {
         
-        try {
-
-            Map<Integer, FiniteFieldVector> decoded = codingVectorDecoder.addVector(p.getCodingVector());
-            
-            /* add the current packet only if it was linearly independant, this
-             will be used to decode future packets*/
-            packets.add(p);
-
-            /* decode the new packets that can be decoded */
-            Vector<UncodedPacket> output = new Vector<UncodedPacket>();
-            
-            for ( Map.Entry<Integer, FiniteFieldVector> entry : decoded.entrySet() ) {
-
-                FiniteFieldVector decodedPayload = decodePayload(entry.getValue());
-
-                output.add(new UncodedPacket((int) entry.getKey(), decodedPayload));
-
-            }
-
-            return output;
-
-            
-        } catch (LinearDependantException ex) {
-            return new Vector<UncodedPacket>();
+        Map<Integer, Vector> decoded = codingVectorDecoder.addVector(p.getCodingVector());
+    
+        if ( decoded == null ) {
+        	return new ArrayList<UncodedPacket>();
         }
         
+        /* add the current packet only if it was linearly independant, this
+         will be used to decode future packets*/
+        packets.add(p);
+
+        /* decode the new packets that can be decoded */
+        ArrayList<UncodedPacket> output = new ArrayList<UncodedPacket>();
+        
+        for ( Map.Entry<Integer, Vector> entry : decoded.entrySet() ) {
+
+            Vector decodedPayload = decodePayload(entry.getValue());
+
+            output.add(new UncodedPacket((int) entry.getKey(), decodedPayload));
+
+        }
+
+        return output;
+
     }
 
-    private FiniteFieldVector decodePayload(FiniteFieldVector encoding) {
+    private Vector decodePayload(Vector encoding) {
         
         /* this vector will store the linear combination of coded payloads that
            correspond to the decoded payload */
-        FiniteFieldVector decodedPayload = new FiniteFieldVector(payloadCoordinatesCount, ff);
+        Vector decodedPayload = new Vector(payloadCoordinatesCount, ff);
         int[] coordinates3 = decodedPayload.coordinates;
         
         /* linearly combine the payloads */
@@ -122,7 +119,7 @@ public class PacketDecoder {
                 continue;
             }
 
-            FiniteFieldVector codedPayload = packets.get(codedPacketId).getPayload();
+            Vector codedPayload = packets.get(codedPacketId).getPayload();
             int[] coordinates2 = codedPayload.coordinates;
             
             /* linearly combine the payload of packet "codedPacketId" */
@@ -136,7 +133,12 @@ public class PacketDecoder {
         return decodedPayload;
     }
 
-    
+    /**
+     * Returns a list of the coded packets that have been added to the decoder
+     * 
+     * @return a list of the coded packets added to the decoder
+     * 
+     */
     public List<CodedPacket> getCodedPackets() {
     	return packets;
     }

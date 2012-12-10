@@ -26,7 +26,7 @@
  *******************************************************************************/
 package ch.epfl.arni.ncutils;
 
-import ch.epfl.arni.ncutils.FiniteFieldVector;
+import ch.epfl.arni.ncutils.Vector;
 import ch.epfl.arni.ncutils.FiniteField;
 
 import org.junit.After;
@@ -40,9 +40,9 @@ import static org.junit.Assert.*;
  *
  * @author lokeller
  */
-public class FiniteFieldVectorTest {
+public class VectorTest {
 
-    public FiniteFieldVectorTest() {
+    public VectorTest() {
     }
 
     @BeforeClass
@@ -65,7 +65,7 @@ public class FiniteFieldVectorTest {
 
     @Test
     public void testSetToZero() {        
-        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        Vector instance = new Vector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoordinate(i, 1);
@@ -80,14 +80,14 @@ public class FiniteFieldVectorTest {
 
     @Test
     public void testCopyTo() {
-        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        Vector instance = new Vector(size, FiniteField.getDefaultFiniteField());
         
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoordinate(i, 1);
         }
 
-        FiniteFieldVector instance2 = instance.copy();
+        Vector instance2 = instance.copy();
 
         for (int i = 0 ; i < 10; i++) {
             assertTrue(instance2.getCoordinate(i) == 1);
@@ -97,7 +97,7 @@ public class FiniteFieldVectorTest {
 
     @Test
     public void testSetGetCoordinates() {
-        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        Vector instance = new Vector(size, FiniteField.getDefaultFiniteField());
 
         for (int j = 0 ; j < 10; j++) {
             for (int i = 0 ; i < instance.getFiniteField().getCardinality(); i++) {
@@ -112,7 +112,7 @@ public class FiniteFieldVectorTest {
     public void testGetFiniteField() {
 
         FiniteField ff = new FiniteField(17);
-        FiniteFieldVector instance = new FiniteFieldVector(size, ff);
+        Vector instance = new Vector(size, ff);
 
         assertTrue(ff == instance.getFiniteField());
         
@@ -121,15 +121,15 @@ public class FiniteFieldVectorTest {
     @Test
     public void testAdd() {
 
-        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
-        FiniteFieldVector instance2 = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        Vector instance = new Vector(size, FiniteField.getDefaultFiniteField());
+        Vector instance2 = new Vector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoordinate(i, 1);
             instance2.setCoordinate(i, 7);
         }
 
-        FiniteFieldVector instance3 = instance.add(instance2);
+        Vector instance3 = instance.add(instance2);
 
         for (int i = 0 ; i < 10; i++) {
             assertTrue(instance3.getCoordinate(i) == instance.getFiniteField().sum[1][7]);
@@ -140,13 +140,13 @@ public class FiniteFieldVectorTest {
     @Test
     public void testScalarMultiply() {
 
-        FiniteFieldVector instance = new FiniteFieldVector(size, FiniteField.getDefaultFiniteField());
+        Vector instance = new Vector(size, FiniteField.getDefaultFiniteField());
 
         for (int i = 0 ; i < 10; i++) {
             instance.setCoordinate(i, 3);
         }
 
-        FiniteFieldVector instance2 = instance.scalarMultiply(3);
+        Vector instance2 = instance.scalarMultiply(3);
 
         for (int i = 0 ; i < 10; i++) {
             assertTrue(instance2.getCoordinate(i) == instance.getFiniteField().mul[3][3]);
@@ -157,16 +157,16 @@ public class FiniteFieldVectorTest {
     @Test
     public void testHashCode() {
     	
-    	FiniteFieldVector v1 = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());    	
+    	Vector v1 = new Vector(10, FiniteField.getDefaultFiniteField());    	
     	v1.setCoordinate(1, 5);
     	
-    	FiniteFieldVector v2 = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());    	
+    	Vector v2 = new Vector(10, FiniteField.getDefaultFiniteField());    	
     	v2.setCoordinate(1, 3);
 
-    	FiniteFieldVector v3 = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());    	
+    	Vector v3 = new Vector(10, FiniteField.getDefaultFiniteField());    	
     	v3.setCoordinate(1, 5);
 
-    	FiniteFieldVector v4 = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());
+    	Vector v4 = new Vector(10, FiniteField.getDefaultFiniteField());
      	
     	assertEquals(v1.hashCode(), v1.hashCode());
     	
@@ -177,12 +177,12 @@ public class FiniteFieldVectorTest {
     	assertFalse(v1.hashCode() == v4.hashCode());
     	
     	
-    	FiniteFieldVector v5 = new FiniteFieldVector(10, new FiniteField(2, 8));
+    	Vector v5 = new Vector(10, new FiniteField(2, 8));
     	v5.setCoordinate(1, 5);
     	
     	assertFalse(v1.hashCode() == v5.hashCode());
     	
-    	assertTrue(new FiniteFieldVector(10, null).hashCode() == new FiniteFieldVector(10, null).hashCode());
+    	assertTrue(new Vector(10, null).hashCode() == new Vector(10, null).hashCode());
     	
     }
     
@@ -191,31 +191,31 @@ public class FiniteFieldVectorTest {
     public void testEquals() {
     	
 		 
-		FiniteFieldVector v = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());
+		Vector v = new Vector(10, FiniteField.getDefaultFiniteField());
 	
 		v.setCoordinate(9, 1);
 		
 		assertFalse(v.equals(new Object()));
 		assertFalse(v.equals(null));
-		assertFalse(v.equals(new FiniteFieldVector(10, FiniteField.getDefaultFiniteField())));
-		assertFalse(v.equals(new FiniteFieldVector(15, FiniteField.getDefaultFiniteField())));
-		assertFalse(v.equals(new FiniteFieldVector(5, FiniteField.getDefaultFiniteField())));
+		assertFalse(v.equals(new Vector(10, FiniteField.getDefaultFiniteField())));
+		assertFalse(v.equals(new Vector(15, FiniteField.getDefaultFiniteField())));
+		assertFalse(v.equals(new Vector(5, FiniteField.getDefaultFiniteField())));
 	
-		FiniteFieldVector v2 = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());
+		Vector v2 = new Vector(10, FiniteField.getDefaultFiniteField());
 		
 		v2.setCoordinate(9, 1);
 	
 		assertTrue(v.equals(v2));
 		
-		FiniteFieldVector v5 = new FiniteFieldVector(10, new FiniteField(2, 8));
+		Vector v5 = new Vector(10, new FiniteField(2, 8));
 		v5.setCoordinate(9, 1);
     	
     	assertFalse(v.equals(v5));
     	
     	assertTrue(v.equals(v));
 		
-    	assertFalse( new FiniteFieldVector(10, null).equals(new FiniteFieldVector(10, FiniteField.getDefaultFiniteField())));
-    	assertTrue( new FiniteFieldVector(10, null).equals(new FiniteFieldVector(10, null)));
+    	assertFalse( new Vector(10, null).equals(new Vector(10, FiniteField.getDefaultFiniteField())));
+    	assertTrue( new Vector(10, null).equals(new Vector(10, null)));
     	
     }
     

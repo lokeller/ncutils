@@ -31,19 +31,19 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.FiniteFieldMatrix;
+import ch.epfl.arni.ncutils.Matrix;
 
-public class FiniteFieldMatrixTest {
+public class MatrixTest {
 
 	@Test
 	public void testFiniteFieldMatrixIntIntFiniteField() {
 
 		try {
-			new FiniteFieldMatrix(10, 20, null);
+			new Matrix(10, 20, null);
 			fail();
 		} catch (Exception e) {}
 		
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());
 		
 		assertEquals(10, m.getRowCount());
 		assertEquals(20, m.getColumnCount());
@@ -59,7 +59,7 @@ public class FiniteFieldMatrixTest {
 		
 		data[1][1] = 1 ;
 		
-		FiniteFieldMatrix m = new FiniteFieldMatrix(data, FiniteField.getDefaultFiniteField());
+		Matrix m = Matrix.wrap(data, FiniteField.getDefaultFiniteField());
 		
 		assertEquals(10, m.getRowCount());
 		assertEquals(20, m.getColumnCount());
@@ -80,7 +80,7 @@ public class FiniteFieldMatrixTest {
 		
 		data[1][1] = 1 ;
 		
-		FiniteFieldMatrix m = FiniteFieldMatrix.wrap(data, FiniteField.getDefaultFiniteField());
+		Matrix m = Matrix.wrap(data, FiniteField.getDefaultFiniteField());
 		
 		assertEquals(10, m.getRowCount());
 		assertEquals(20, m.getColumnCount());
@@ -97,7 +97,7 @@ public class FiniteFieldMatrixTest {
 		
 		assertEquals(3, data[2][2]);
 		
-		FiniteFieldMatrix m2 = FiniteFieldMatrix.wrap(new int[0][0], FiniteField.getDefaultFiniteField());
+		Matrix m2 = Matrix.wrap(new int[0][0], FiniteField.getDefaultFiniteField());
 		
 		assertEquals(0, m2.getColumnCount());
 		assertEquals(0, m2.getRowCount());
@@ -107,11 +107,11 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testSetGetRow() {
 		
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());
 		
 		m.setEntry(3, 1, 1);
 		
-		FiniteFieldVector v = new FiniteFieldVector(20, FiniteField.getDefaultFiniteField());
+		Vector v = new Vector(20, FiniteField.getDefaultFiniteField());
 		
 		v.setCoordinate(3, 10);
 		
@@ -123,11 +123,11 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testSetGetColumn() {
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());
 		
 		m.setEntry(3, 1, 1);
 		
-		FiniteFieldVector v = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());
+		Vector v = new Vector(10, FiniteField.getDefaultFiniteField());
 		
 		v.setCoordinate(3, 10);
 		
@@ -141,9 +141,9 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testAppendRow() {
 	
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());
 				
-		FiniteFieldVector v = new FiniteFieldVector(20, FiniteField.getDefaultFiniteField());
+		Vector v = new Vector(20, FiniteField.getDefaultFiniteField());
 		
 		v.setCoordinate(3, 10);
 		
@@ -155,9 +155,9 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testAppendColumn() {
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());
 				
-		FiniteFieldVector v = new FiniteFieldVector(10, FiniteField.getDefaultFiniteField());
+		Vector v = new Vector(10, FiniteField.getDefaultFiniteField());
 		
 		v.setCoordinate(3, 10);
 		
@@ -170,20 +170,20 @@ public class FiniteFieldMatrixTest {
 	public void testGetInverse() {
 	
 		try {
-			new FiniteFieldMatrix(2,3, FiniteField.getDefaultFiniteField()).getInverse();
+			new Matrix(2,3, FiniteField.getDefaultFiniteField()).toInverse();
 			fail();
 		} catch (Exception e) {}
 	
 		
-		assertEquals(null, new FiniteFieldMatrix(3,3, FiniteField.getDefaultFiniteField()).getInverse());		
+		assertEquals(null, new Matrix(3,3, FiniteField.getDefaultFiniteField()).toInverse());		
 		
-		FiniteFieldMatrix A = FiniteFieldMatrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 12132341);
+		Matrix A = Matrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 12132341);
 		
-		FiniteFieldMatrix m = FiniteFieldMatrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 12131);
+		Matrix m = Matrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 12131);
 		
-		FiniteFieldMatrix m1 = m.getInverse();
+		Matrix m1 = m.toInverse();
 		
-		FiniteFieldMatrix m3 = A.multiply(m).multiply(m1);
+		Matrix m3 = A.multiply(m).multiply(m1);
 		
 		assertEquals(A, m3);		
 		
@@ -194,16 +194,16 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testGetTranspose() {
 		
-		FiniteFieldMatrix m = new FiniteFieldMatrix(10, 20, FiniteField.getDefaultFiniteField());		
+		Matrix m = new Matrix(10, 20, FiniteField.getDefaultFiniteField());		
 		m.setEntry(3, 1, 1);
 		
-		assertEquals(1, m.getTranspose().getEntry(1, 3));
+		assertEquals(1, m.toTranspose().getEntry(1, 3));
 	}
 	
 	@Test
 	public void testGetRowSpace() {
 		
-		FiniteFieldMatrix m = FiniteFieldMatrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 2342);
+		Matrix m = Matrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 2342);
 		
 		assertEquals(5, m.getRank());
 		
@@ -211,11 +211,11 @@ public class FiniteFieldMatrixTest {
 		
 		assertEquals(5, s.getDimension());
 		
-		FiniteFieldVector v = m.copyRow(3).add(m.copyRow(4));
+		Vector v = m.copyRow(3).add(m.copyRow(4));
 		
 		assertTrue(s.contains(v));
 		
-		FiniteFieldVector v2 = m.copyRow(3);
+		Vector v2 = m.copyRow(3);
 		v2.setCoordinate(0, 5);
 		
 		assertFalse(s.contains(v2));		
@@ -224,7 +224,7 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testGetColumnSpace() {
-		FiniteFieldMatrix m = FiniteFieldMatrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
+		Matrix m = Matrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
 		
 		assertEquals(5, m.getRank());
 		
@@ -232,7 +232,7 @@ public class FiniteFieldMatrixTest {
 		
 		assertEquals(5, s.getDimension());		
 		
-		FiniteFieldVector v = m.copyColumn(3).add(m.copyColumn(4));
+		Vector v = m.copyColumn(3).add(m.copyColumn(4));
 		
 		assertTrue(s.contains(v));
 		
@@ -242,9 +242,9 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testScalarMultiply() {
 		
-		FiniteFieldMatrix m = FiniteFieldMatrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
+		Matrix m = Matrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
 		
-		FiniteFieldMatrix m2 = m.scalarMultiply(3); 
+		Matrix m2 = m.scalarMultiply(3); 
 				
 		for ( int i = 0 ; i < 5 ; i++) {			
 			assertEquals(m.copyRow(i).scalarMultiply(3), m2.copyRow(i));
@@ -254,10 +254,10 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testAdd() {
-		FiniteFieldMatrix m = FiniteFieldMatrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
-		FiniteFieldMatrix m2 = FiniteFieldMatrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 232323);
+		Matrix m = Matrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 23423);
+		Matrix m2 = Matrix.createRandomMatrix(5, 10, FiniteField.getDefaultFiniteField(), 232323);
 			
-		FiniteFieldMatrix m3 = m.add(m2); 
+		Matrix m3 = m.add(m2); 
 		
 		for ( int i = 0 ; i < 5 ; i++) {			
 			assertEquals(m.copyRow(i).add(m2.copyRow(i)), m3.copyRow(i));
@@ -268,7 +268,7 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testCreateIdentityMatrix() {
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createIdentityMatrix(5, FiniteField.getDefaultFiniteField());
+		Matrix matrix = Matrix.createIdentityMatrix(5, FiniteField.getDefaultFiniteField());
 		
 		for (int i = 0 ; i < 5 ;i++) {
 			for (int j = 0 ; j < 5 ; j++) {
@@ -284,7 +284,7 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testCreateRandomMatrix() {
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField());
+		Matrix matrix = Matrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField());
 		
 		assertEquals(matrix.getFiniteField(), FiniteField.getDefaultFiniteField());
 		assertEquals(20, matrix.getColumnCount());
@@ -293,9 +293,9 @@ public class FiniteFieldMatrixTest {
 
 	@Test
 	public void testUtilityMethods() {
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
+		Matrix matrix = Matrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
 		
-		FiniteFieldMatrix copy = matrix.copy();
+		Matrix copy = matrix.copy();
 		
 		assertEquals(matrix, copy);
 		assertEquals(copy.hashCode(), matrix.hashCode());
@@ -305,8 +305,8 @@ public class FiniteFieldMatrixTest {
 		assertFalse(matrix.equals(copy));
 		assertFalse(copy.hashCode() == matrix.hashCode());
 		
-		assertFalse(matrix.equals(new FiniteFieldMatrix(10, 2, FiniteField.getDefaultFiniteField())));
-		assertFalse(matrix.equals(new FiniteFieldMatrix(2, 10, FiniteField.getDefaultFiniteField())));
+		assertFalse(matrix.equals(new Matrix(10, 2, FiniteField.getDefaultFiniteField())));
+		assertFalse(matrix.equals(new Matrix(2, 10, FiniteField.getDefaultFiniteField())));
 		
 		assertFalse(matrix.equals(null));
 		assertTrue(matrix.equals(matrix));
@@ -316,10 +316,10 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testCopySubmatrix() {
 
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createIdentityMatrix(10, FiniteField.getDefaultFiniteField());
+		Matrix matrix = Matrix.createIdentityMatrix(10, FiniteField.getDefaultFiniteField());
 		
-		FiniteFieldMatrix m1 = matrix.copySubMatrix(5, 0, 9, 3);
-		FiniteFieldMatrix m2 = matrix.copySubMatrix(0, 0, 3, 3);
+		Matrix m1 = matrix.copySubMatrix(5, 0, 9, 3);
+		Matrix m2 = matrix.copySubMatrix(0, 0, 3, 3);
 		
 		assertEquals(5, m1.getRowCount());
 		assertEquals(4, m1.getColumnCount());
@@ -346,7 +346,7 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testToString() {
 		
-		FiniteFieldMatrix m = new FiniteFieldMatrix(2,2, FiniteField.getDefaultFiniteField());
+		Matrix m = new Matrix(2,2, FiniteField.getDefaultFiniteField());
 	
 		assertEquals("0\t0\n0\t0\n", m.toString());		
 	}
@@ -356,21 +356,21 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testToRowEchelonForm() {
 
-		FiniteFieldMatrix matrix2 = FiniteFieldMatrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField(), 1234);
+		Matrix matrix2 = Matrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField(), 1234);
 		
 		assertTrue(matrix2.toRowEchelonForm().copyRowSpace().equals(matrix2.copyRowSpace()));		
 		
-		FiniteFieldMatrix matrix3 = FiniteFieldMatrix.createRandomMatrix(20, 10, FiniteField.getDefaultFiniteField(), 1234);		
+		Matrix matrix3 = Matrix.createRandomMatrix(20, 10, FiniteField.getDefaultFiniteField(), 1234);		
 		
 		assertTrue(matrix3.toRowEchelonForm().copyRowSpace().equals(matrix3.copyRowSpace()));				
 		
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
+		Matrix matrix = Matrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
 				
 		for ( int i = 0 ; i < 10 ; i++) {
 			matrix.setEntry(i, 3, 0);
 		}
 		
-		FiniteFieldMatrix rowEchelon = matrix.toRowEchelonForm();		
+		Matrix rowEchelon = matrix.toRowEchelonForm();		
 		
 		assertTrue(rowEchelon.isUpperTriangular());
 		
@@ -381,16 +381,16 @@ public class FiniteFieldMatrixTest {
 	@Test
 	public void testToReducedRowEchelonForm() {
 
-		FiniteFieldMatrix matrix2 = FiniteFieldMatrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField(), 1234);
+		Matrix matrix2 = Matrix.createRandomMatrix(10, 20, FiniteField.getDefaultFiniteField(), 1234);
 				
 		assertTrue(matrix2.toReducedRowEchelonForm().copySubMatrix(0, 0, 9, 9).isIdentity());		
 		
-		FiniteFieldMatrix matrix3 = FiniteFieldMatrix.createRandomMatrix(20, 10, FiniteField.getDefaultFiniteField(), 1234);		
+		Matrix matrix3 = Matrix.createRandomMatrix(20, 10, FiniteField.getDefaultFiniteField(), 1234);		
 		
 		assertTrue(matrix3.toReducedRowEchelonForm().copySubMatrix(0, 0, 9, 9).isIdentity());
 		assertTrue(matrix3.toReducedRowEchelonForm().copySubMatrix(10, 0, 19, 9).isZero());
 		
-		FiniteFieldMatrix matrix = FiniteFieldMatrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
+		Matrix matrix = Matrix.createRandomMatrix(10, 10, FiniteField.getDefaultFiniteField(), 1234);
 		
 		assertTrue(!matrix.isUpperTriangular());
 			
@@ -398,7 +398,7 @@ public class FiniteFieldMatrixTest {
 			matrix.setEntry(i, 3, 0);
 		}
 		
-		FiniteFieldMatrix rowEchelon = matrix.toReducedRowEchelonForm();		
+		Matrix rowEchelon = matrix.toReducedRowEchelonForm();		
 		
 		assertTrue(rowEchelon.isUpperTriangular());
 		

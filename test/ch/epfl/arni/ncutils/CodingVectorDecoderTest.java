@@ -28,8 +28,7 @@ package ch.epfl.arni.ncutils;
 
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.FiniteFieldVector;
-import ch.epfl.arni.ncutils.LinearDependantException;
+import ch.epfl.arni.ncutils.Vector;
 import java.util.Map;
 import java.util.Random;
 import org.junit.After;
@@ -64,7 +63,7 @@ public class CodingVectorDecoderTest {
     public void tearDown() {
     }
 
-    private static void checkInverse(FiniteFieldVector[] vectors, FiniteFieldVector[] inverse, int size) {
+    private static void checkInverse(Vector[] vectors, Vector[] inverse, int size) {
 
        FiniteField ff = vectors[0].getFiniteField();
        for (int i= 0 ; i < size ; i++) {
@@ -91,28 +90,28 @@ public class CodingVectorDecoderTest {
 
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
         for (int i = 0; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
             vectors[i].setCoordinate(i, 1);
         }
 
-        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+        Vector[] inverse = new Vector[size];
 
         for (int i = 0; i < size; i++) {
-            try {
 
-                Map<Integer, FiniteFieldVector> dd = d.addVector(vectors[i]);
+            Map<Integer, Vector> dd = d.addVector(vectors[i]);
 
-                assertTrue(dd.size() == 1 && dd.containsKey(i) == true);
-
-                for ( Map.Entry<Integer, FiniteFieldVector> entry : dd.entrySet()) {
-                    inverse[entry.getKey()] = entry.getValue();
-                }
-
-            } catch (LinearDependantException ex) {
-                fail();
+            if ( dd == null) {
+            	fail();
             }
+            
+            assertTrue(dd.size() == 1 && dd.containsKey(i) == true);
+
+            for ( Map.Entry<Integer, Vector> entry : dd.entrySet()) {
+                inverse[entry.getKey()] = entry.getValue();
+            }
+
         }
 
         checkInverse(vectors, inverse, size);
@@ -120,29 +119,32 @@ public class CodingVectorDecoderTest {
 
     @Test
     public void testInstantlyDecodable() {
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
         for (int i = 0; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
             for ( int j = 0 ; j <= i ; j++) {
                 vectors[i].setCoordinate(j, 1);
             }
         }
 
-        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+        Vector[] inverse = new Vector[size];
 
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
         for (int i = 0; i < size; i++) {
-            try {
-                Map<Integer, FiniteFieldVector> dd = d.addVector(vectors[i]);
-                assertTrue (dd.size() == 1 && dd.containsKey(i) == true);
-
-                for ( Map.Entry<Integer, FiniteFieldVector> entry : dd.entrySet()) {
-                    inverse[entry.getKey()] = entry.getValue();
-                }
-            } catch (LinearDependantException ex) {
-                fail();
+        
+            Map<Integer, Vector> dd = d.addVector(vectors[i]);
+            
+            if (dd == null) {
+            	fail();
             }
+            
+            assertTrue (dd.size() == 1 && dd.containsKey(i) == true);
+
+            for ( Map.Entry<Integer, Vector> entry : dd.entrySet()) {
+                inverse[entry.getKey()] = entry.getValue();
+            }
+
         }
 
         checkInverse(vectors, inverse, size);
@@ -150,30 +152,32 @@ public class CodingVectorDecoderTest {
 
     @Test
     public void testNonDecodable() {
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
             vectors[i].setCoordinate(i, 1);
             vectors[i].setCoordinate(size-1, 1);
         }
 
-        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+        Vector[] inverse = new Vector[size];
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
         for (int i = 0; i < size; i++) {
-            try {
-                Map<Integer, FiniteFieldVector> dd = d.addVector(vectors[i]);
-                assertTrue (( i < size -1 && dd.size() == 0) || ( i == size -1 && dd.size() == size));
-
-
-                for ( Map.Entry<Integer, FiniteFieldVector> entry : dd.entrySet()) {
-                    inverse[entry.getKey()] = entry.getValue();
-                }
-
-            } catch (LinearDependantException ex) {
-                fail();
+            
+            Map<Integer, Vector> dd = d.addVector(vectors[i]);
+            
+            if (dd == null) {
+            	fail();
             }
+            
+            assertTrue (( i < size -1 && dd.size() == 0) || ( i == size -1 && dd.size() == size));
+
+
+            for ( Map.Entry<Integer, Vector> entry : dd.entrySet()) {
+                inverse[entry.getKey()] = entry.getValue();
+            }
+
         }
 
         checkInverse(vectors, inverse, size);
@@ -181,11 +185,11 @@ public class CodingVectorDecoderTest {
 
     @Test
     public void testLinearlyDependant() {
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
 
         Random r = new Random(2131231);
 
-        vectors[0] = new FiniteFieldVector(size, ff);
+        vectors[0] = new Vector(size, ff);
         for (int i = 1; i < size; i++) {
             vectors[0].setCoordinate(i, r.nextInt(ff.getCardinality()));
         }
@@ -193,7 +197,7 @@ public class CodingVectorDecoderTest {
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
         for (int i = 1; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
 
             int x = r.nextInt(ff.getCardinality());
             for (int j = 1; j < size; j++) {
@@ -203,22 +207,22 @@ public class CodingVectorDecoderTest {
 
         }
         for (int i = 0; i < size; i++) {
-            try {
-                d.addVector(vectors[i]);
-                assertTrue( i == 0 );
-            } catch (LinearDependantException ex) {
+        
+            if ( d.addVector(vectors[i]) != null) {
+            	assertTrue( i == 0 );
             }
+        
         }
     }
 
      @Test
      public void testRandomMatrix() {
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
 
         Random r = new Random(2131231);
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
 
             for (int j = 0; j < size; j++) {
                 int x = r.nextInt(ff.getCardinality());
@@ -227,18 +231,19 @@ public class CodingVectorDecoderTest {
 
         }
 
-        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+        Vector[] inverse = new Vector[size];
         CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
 
         for (int i = 0; i < size; i++) {
-            try {
-                Map<Integer, FiniteFieldVector> dd = d.addVector(vectors[i]);
+            
+            Map<Integer, Vector> dd = d.addVector(vectors[i]);
 
-                for ( Map.Entry<Integer, FiniteFieldVector> entry : dd.entrySet()) {
-                    inverse[entry.getKey()] = entry.getValue();
-                }
-            } catch (LinearDependantException ex) {
-                fail();
+            if ( dd == null ) {
+            	fail();
+            }
+            
+            for ( Map.Entry<Integer, Vector> entry : dd.entrySet()) {
+                inverse[entry.getKey()] = entry.getValue();
             }
         }
 
@@ -251,7 +256,7 @@ public class CodingVectorDecoderTest {
       	CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
       	       
          for (int i = 0; i < size; i++) {
-             FiniteFieldVector v = new FiniteFieldVector(size, ff);
+             Vector v = new Vector(size, ff);
              v.setCoordinate(i, 1);
              
              try {
@@ -271,7 +276,7 @@ public class CodingVectorDecoderTest {
      	CodingVectorDecoder d = new CodingVectorDecoder(size,ff);
      	       
         for (int i = 0; i < size; i++) {
-            FiniteFieldVector v = new FiniteFieldVector(size, ff);
+            Vector v = new Vector(size, ff);
             v.setCoordinate(i, 1);
             
             try {
@@ -281,12 +286,11 @@ public class CodingVectorDecoderTest {
 			}
         }
      	
-        FiniteFieldVector v = new FiniteFieldVector(size, ff);
+        Vector v = new Vector(size, ff);
         
-        try {
-        	d.addVector(v);
-        	fail();
-        } catch (LinearDependantException e) {}
+    	if ( d.addVector(v) != null) {
+    		fail();
+    	}
              	
     }
      

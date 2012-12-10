@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.LinearDependantException;
 
 /**
  *
@@ -80,7 +79,6 @@ public class F256CodingVectorDecoder {
          * Construct a new decoder
          *
          * @param maxPackets the length of the vectors have to be decoded
-         * @param ff the finite field used in the decoder
          */
         public F256CodingVectorDecoder(int maxPackets) {
             decodeMatrix = new int[maxPackets][maxPackets * 2];
@@ -109,17 +107,17 @@ public class F256CodingVectorDecoder {
          *
          * @param v a coding vector of length compatible with the decoder
          * @return a map that associates an id of an uncoded packet with a vector
-         * containing the coefficients that must be used to recover its payload
+         * containing the coefficients that must be used to recover its payload,
+         * returns null if the vector being added is linearly dependant of the vectors
+         * already added.
          * 
-         * @throws LinearDependantException the vector being added is linearly dependant
-         * from the previously decoded vectors.
          */
-	public Map<Integer,F256Vector> addVector(F256Vector v) throws LinearDependantException {
+	public Map<Integer,F256Vector> addVector(F256Vector v) {
         
 		
 				/* if the matrix is already full rank don't add this vector */
 				if ( packetCount == decodeMatrix.length) {
-					throw new LinearDependantException();
+					return null;
 				}
 		
                 final int [][] mul = ff.mul;
@@ -173,8 +171,7 @@ public class F256CodingVectorDecoder {
 		/* if the packet is not li stop here */
 		
 		if (pivot == -1 ) {                        
-
-                        throw new LinearDependantException();
+			return null;
 		}                
                 
 		/* divide the line */		

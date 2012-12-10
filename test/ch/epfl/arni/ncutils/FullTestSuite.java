@@ -38,13 +38,13 @@ import org.junit.runners.Suite;
  * @author lokeller
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ch.epfl.arni.ncutils.FiniteFieldVectorTest.class,
+@Suite.SuiteClasses({ch.epfl.arni.ncutils.VectorTest.class,
                         ch.epfl.arni.ncutils.FiniteFieldTest.class,
                         ch.epfl.arni.ncutils.CodingVectorDecoderTest.class,
                         ch.epfl.arni.ncutils.UncodedPacketTest.class,
                         ch.epfl.arni.ncutils.PacketDecoderTest.class,
                         ch.epfl.arni.ncutils.CodedPacketTest.class,
-                        ch.epfl.arni.ncutils.FiniteFieldMatrixTest.class,
+                        ch.epfl.arni.ncutils.MatrixTest.class,
                         ch.epfl.arni.ncutils.VectorSpaceTest.class})
 public class FullTestSuite {
 

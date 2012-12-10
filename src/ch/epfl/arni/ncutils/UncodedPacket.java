@@ -48,6 +48,8 @@ public class UncodedPacket implements Comparable<UncodedPacket> {
      *
      * @param id the id of the packet
      * @param payload the payload
+     * 
+     * @return an uncoded packet that uses the specified array as storage 
      */
     public static UncodedPacket wrap(int id, byte[] payload) {
         UncodedPacket pkt = new UncodedPacket(id);
@@ -78,7 +80,7 @@ public class UncodedPacket implements Comparable<UncodedPacket> {
      * @param id the id of the packet
      * @param payload a vector that will be the payload
      */
-    public UncodedPacket(int id, FiniteFieldVector payload) {        
+    public UncodedPacket(int id, Vector payload) {        
 
         this.id = id;
         this.payload = payload.getFiniteField().vectorToBytes(payload);
@@ -112,6 +114,12 @@ public class UncodedPacket implements Comparable<UncodedPacket> {
         return ret;
     }
 
+    /**
+     * 
+     * Returns a copy of the uncoded packet.
+     * 
+     * @return a copy of this packet.
+     */
 	public UncodedPacket copy() {
 		UncodedPacket copy = new UncodedPacket(this.id, new byte[payload.length]);
 		

@@ -28,12 +28,9 @@ package examples;
 
 import ch.epfl.arni.ncutils.CodingVectorDecoder;
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.FiniteFieldVector;
-import ch.epfl.arni.ncutils.LinearDependantException;
+import ch.epfl.arni.ncutils.Vector;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -51,7 +48,7 @@ public class CodingVectorLevelExample {
 
         FiniteField ff = FiniteField.getDefaultFiniteField();
 
-        /* intializes a random generator with a fixed seed to obtain
+        /* initializes a random generator with a fixed seed to obtain
          * deterministic results.
          */
         Random r = new Random(12312);
@@ -68,10 +65,10 @@ public class CodingVectorLevelExample {
          * will not)
          *
          */
-        FiniteFieldVector[] vectors = new FiniteFieldVector[size];
+        Vector[] vectors = new Vector[size];
 
         for (int i = 0; i < size; i++) {
-            vectors[i] = new FiniteFieldVector(size, ff);
+            vectors[i] = new Vector(size, ff);
 
             for (int j = 0; j < size ; j++) {
                 vectors[i].setCoordinate(j, r.nextInt(FiniteField.getDefaultFiniteField().getCardinality()));
@@ -87,30 +84,24 @@ public class CodingVectorLevelExample {
         /* store the start time of the decoding */
         long m = System.currentTimeMillis();
 
-        FiniteFieldVector[] inverse = new FiniteFieldVector[size];
+        Vector[] inverse = new Vector[size];
 
         /* decode one after another all the coding vectors */
         for (int i = 0 ; i < size ; i++) {
-            try {
 
-                /* the decode method returns the blocks that can be decoded
-                 * from the vector given as a parameter and the vectors that
-                 * were previously inserted
-                 */
+            /* the decode method returns the blocks that can be decoded
+             * from the vector given as a parameter and the vectors that
+             * were previously inserted
+             */
 
-                Map<Integer,FiniteFieldVector> o = d.addVector(vectors[i]);
+            Map<Integer,Vector> o = d.addVector(vectors[i]);
 
-                for (Map.Entry<Integer, FiniteFieldVector> entry : o.entrySet()) {
-                    inverse[entry.getKey()] = entry.getValue();
-                }
-
-                //System.out.println( "Decoded: " + o);
-            } catch (LinearDependantException ex) {
-
-                /* this exception is thrown if the vector being decoded is
-                 linearly dependent from what has been sent previously */
-                Logger.getLogger(CodingVectorLevelExample.class.getName()).log(Level.SEVERE, null, ex);
+            if ( o != null) {
+	            for (Map.Entry<Integer, Vector> entry : o.entrySet()) {
+	                inverse[entry.getKey()] = entry.getValue();
+	            }
             }
+
         }
 
         /*

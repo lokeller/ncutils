@@ -34,7 +34,7 @@ import java.util.Arrays;
  * @author lokeller
  */
 
-public class FiniteFieldVector {
+public class Vector {
 
     int[] coordinates;
     private FiniteField ff ;
@@ -49,8 +49,8 @@ public class FiniteFieldVector {
      * 
      * @return a vector that is using the specified array to store its coordinates
      */
-    public static FiniteFieldVector wrap(int [] coordinates, FiniteField ff) {
-    	return new FiniteFieldVector(coordinates, ff);
+    public static Vector wrap(int [] coordinates, FiniteField ff) {
+    	return new Vector(coordinates, ff);
     }
     
     /**
@@ -59,12 +59,12 @@ public class FiniteFieldVector {
      * @param length the number of coordinates of the vector
      * @param ff the finite field used to define the vector
      */
-    public FiniteFieldVector(int length, FiniteField ff) {
+    public Vector(int length, FiniteField ff) {
         this.ff = ff;
         coordinates = new int[length];
     }    
     
-    FiniteFieldVector(int [] coordinates, FiniteField ff) {
+    Vector(int [] coordinates, FiniteField ff) {
         this.ff = ff;
         this.coordinates = coordinates;
     }
@@ -123,9 +123,9 @@ public class FiniteFieldVector {
      *
      * @return a copy of the vector
      */
-    public FiniteFieldVector copy() {
+    public Vector copy() {
 
-        FiniteFieldVector vector = new FiniteFieldVector(coordinates.length, ff);
+        Vector vector = new Vector(coordinates.length, ff);
         System.arraycopy(coordinates, 0, vector.coordinates, 0, coordinates.length);
 
         return vector;
@@ -137,8 +137,8 @@ public class FiniteFieldVector {
      * @param vector the other summand
      * @return the sum of this and vector
      */
-    public FiniteFieldVector add(FiniteFieldVector vector) {
-        FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
+    public Vector add(Vector vector) {
+        Vector out = new Vector(getLength(), ff);
 
         for ( int i = 0 ; i < coordinates.length ; i++ ) {
             out.coordinates[i] = ff.sum[coordinates[i]][vector.coordinates[i]];
@@ -147,7 +147,13 @@ public class FiniteFieldVector {
         return out;
     }
     
-    public void addInPlace(FiniteFieldVector vector) {
+    /**
+     * Adds to each of the coordinates of this vector the corresponding coordinate in
+     * the other vector
+     * 
+     * @param vector a second vector to be added
+     */
+    public void addInPlace(Vector vector) {
 
         for ( int i = 0 ; i < coordinates.length ; i++ ) {
             coordinates[i] = ff.sum[coordinates[i]][vector.coordinates[i]];
@@ -158,12 +164,12 @@ public class FiniteFieldVector {
     /**
      * Returns the scalar multiplication of this vector by a coefficient
      *
-     * @param c an element form the field used to define the vecoto
+     * @param c an element form the field used to define the vector
      * @return the scalar multiple of this vector
      */
-    public FiniteFieldVector scalarMultiply(int c) {
+    public Vector scalarMultiply(int c) {
 
-        FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
+        Vector out = new Vector(getLength(), ff);
 
         for ( int i = 0 ; i < coordinates.length ; i++ ) {
             out.coordinates[i] = ff.mul[coordinates[i]][c];
@@ -173,15 +179,34 @@ public class FiniteFieldVector {
 
     }
     
+    /**
+     * Multiplies each of the coordinates of this vector by a given
+     * constant.
+     * 
+     * @param c a constant that is used to multiply the vector coordinates
+     */
     public void scalarMultiplyInPlace(int c) {
     	for ( int i = 0 ; i < coordinates.length ; i++ ) {
             coordinates[i] = ff.mul[coordinates[i]][c];
         }    
     }
     
-    public FiniteFieldVector multiplyAndAdd(int c, FiniteFieldVector other) {
+    /**
+     * 
+     * Returns a copy of this vector where to each coordinate of this vector 
+     * the corresponding coordinate in another vector multiplied by a give 
+     * constant has been added.
+     * 
+     * 
+     * @param c a constant value
+     * @param other a vector
+     * 
+     * @return a copy of this vector to which a scalar multiple of the other vector
+     * has been added
+     */
+    public Vector multiplyAndAdd(int c, Vector other) {
     	
-        FiniteFieldVector out = new FiniteFieldVector(getLength(), ff);
+        Vector out = new Vector(getLength(), ff);
 
         for ( int i = 0 ; i < coordinates.length ; i++ ) {
             out.coordinates[i] = ff.sum[ff.mul[other.coordinates[i]][c]][coordinates[i]];
@@ -191,7 +216,14 @@ public class FiniteFieldVector {
     	
     }
 
-    public void multiplyAndAddInPlace(int c, FiniteFieldVector other) {
+    /**
+     * Adds to each coordinate of this vector a the corresponding coordinate
+     * of antother vector multiplied by a constant 
+     * 
+     * @param c a constant
+     * @param other the vector to be multiplied and added
+     */
+    public void multiplyAndAddInPlace(int c, Vector other) {
 
         for ( int i = 0 ; i < coordinates.length ; i++ ) {
             coordinates[i] = ff.sum[ff.mul[other.coordinates[i]][c]][coordinates[i]];
@@ -215,9 +247,9 @@ public class FiniteFieldVector {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof FiniteFieldVector))
+		if (!(obj instanceof Vector))
 			return false;
-		FiniteFieldVector other = (FiniteFieldVector) obj;
+		Vector other = (Vector) obj;
 		if (!Arrays.equals(coordinates, other.coordinates))
 			return false;
 		if (ff == null) {

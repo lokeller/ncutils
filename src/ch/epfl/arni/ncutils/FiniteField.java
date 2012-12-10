@@ -191,7 +191,7 @@ public class FiniteField {
      * @param bytes an array of bytes
      * @return the representation of the array as a vector
      */
-    public FiniteFieldVector byteToVector(byte [] bytes) {
+    public Vector byteToVector(byte [] bytes) {
     	return byteToVector(bytes, coordinatesCount(bytes.length));
     }
     
@@ -202,11 +202,11 @@ public class FiniteField {
      * @param coordinates how many coordinates should be read
      * @return the representation of the array as a vector
      */
-    public FiniteFieldVector byteToVector(byte [] bytes, int coordinates) {
+    public Vector byteToVector(byte [] bytes, int coordinates) {
     	return byteToVector(bytes, 0, bytes.length, coordinates);
     }
     
-    FiniteFieldVector byteToVector(byte [] bytes, int offset, int length) {
+    Vector byteToVector(byte [] bytes, int offset, int length) {
     	return byteToVector(bytes, offset, length, coordinatesCount(length));
     }
     
@@ -219,7 +219,7 @@ public class FiniteField {
      * @param coordinates the number of coordinates that must be copied
      * @return the representation of the array as a vector
      */
-    public FiniteFieldVector byteToVector(byte [] bytes, int offset, int length, int coordinates) {
+    public Vector byteToVector(byte [] bytes, int offset, int length, int coordinates) {
     	
     	int [] data = new int[coordinates];
     	
@@ -229,7 +229,7 @@ public class FiniteField {
     		data[i] = readBits(bytes, offset, i, bitsPerField);
     	}
     	
-        return new FiniteFieldVector(data, this);        
+        return new Vector(data, this);        
 
     }
 
@@ -239,7 +239,7 @@ public class FiniteField {
      * @param vector a vector over the specified finite field
      * @return the byte array representation
      */
-    public byte[] vectorToBytes(FiniteFieldVector vector) {
+    public byte[] vectorToBytes(Vector vector) {
     	byte[] output = new byte[bytesLength(vector.getLength())];
     	vectorToBytes(vector, output, 0);
     	return output;
@@ -284,7 +284,7 @@ public class FiniteField {
     	
     }
     
-    void vectorToBytes (FiniteFieldVector vector, byte [] output, int start) {    	       
+    void vectorToBytes (Vector vector, byte [] output, int start) {    	       
 
         int[] coordinates = vector.coordinates;
         

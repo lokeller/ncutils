@@ -58,9 +58,7 @@ public class F256CodedPacket {
      *
      * @param packet the uncoded packet that will be copied in the coded packet
      * @param maxPackets the maximal number of uncoded packets that can be combined
-     * in this coded packet. This correspond to the length of teh coding vector.
-     * @param ff The finite field that over which the vectors in the packet are
-     * defined
+     * in this coded packet. This correspond to the length of the coding vector. 
      */
     public F256CodedPacket( UncodedPacket packet, int maxPackets) {
 
@@ -99,8 +97,6 @@ public class F256CodedPacket {
      * @param payloadByteLen the length in bytes of the uncoded packets that can be combined
      * in this packet. The length of the payload vector of this packet will be choosen
      * based on this number accordingly to the finite field used.
-     * @param ff The finite field that over which the vectors in the packet are
-     * defined
      */
     public F256CodedPacket(int maxPackets, int payloadByteLen) {
 
@@ -117,8 +113,6 @@ public class F256CodedPacket {
      * @param data an array containing the binary representation of the coded packet
      * @param offset the first byte of the binary representation in the array data
      * @param length the length of the binary representation
-     * @param ff The finite field that over which the vectors in the packet are
-     * defined
      */
     
     public F256CodedPacket(int maxPackets, byte[] data, int offset, int length) {    	    
@@ -348,6 +342,12 @@ public class F256CodedPacket {
     	
     }
     
+    /**
+     * Copies the binary representation of the packet to an array
+     * 
+     * @param ret the array that will store the coded packet
+     * @param offset the offset of the first byte in ret that should hold the first byte of the binary representation
+     */
     public void toByteArray(byte [] ret, int offset) {
     			    	
 		System.arraycopy(codingVector.coordinates, codingVector.offset, ret, offset, codingVector.len);
@@ -355,6 +355,11 @@ public class F256CodedPacket {
     	
     }
     
+    /**
+     * Returns the length in bytes of the binary representation of this coded packet
+     * 
+     * @return the length in bytes of this packet
+     */
     public int getLengthInBytes() {
     	return codingVector.len + payloadVector.len;
     }

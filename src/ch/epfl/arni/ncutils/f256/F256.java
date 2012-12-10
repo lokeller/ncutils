@@ -35,12 +35,15 @@ import ch.epfl.arni.ncutils.FiniteField;
 public class F256 {
 
 	private static FiniteField ff = new FiniteField(2, 8);
-	
+
+	/**
+	 * Returns a reference to the finite field F_2^8
+	 * 
+	 * @return the finite field F_2^8
+	 */
 	public static FiniteField getF256() {
 		return ff;
 	}
-
-	
 	
 	
 }

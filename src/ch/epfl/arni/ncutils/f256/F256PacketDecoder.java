@@ -26,12 +26,11 @@
  *******************************************************************************/
 package ch.epfl.arni.ncutils.f256;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import ch.epfl.arni.ncutils.FiniteField;
-import ch.epfl.arni.ncutils.LinearDependantException;
 import ch.epfl.arni.ncutils.UncodedPacket;
 
 
@@ -46,7 +45,7 @@ import ch.epfl.arni.ncutils.UncodedPacket;
  */
 public class F256PacketDecoder {
 
-    private Vector<F256CodedPacket> packets = new Vector<F256CodedPacket>();
+    private ArrayList<F256CodedPacket> packets = new ArrayList<F256CodedPacket>();
 
     private F256CodingVectorDecoder codingVectorDecoder;
 
@@ -57,7 +56,6 @@ public class F256PacketDecoder {
     /**
      * Constructs a new PacketDecoder.
      *
-     * @param field the finite field over which the decoder will operate
      * @param maxPackets the maximum number of coded packets, i.e. the length of
      * the coding vectors
      * @param payloadBytesLength the length in bytes of the payload of the packets
@@ -77,37 +75,35 @@ public class F256PacketDecoder {
      * @return a vector of uncoded packets that have been decoded thanks to this
      * coded packet (and what was previously added)
      */
-    public Vector<UncodedPacket> addPacket(F256CodedPacket p) {
+    public List<UncodedPacket> addPacket(F256CodedPacket p) {
 
         assert(p.getFiniteField() == ff);
         assert(p.getCodingVector().getLength() == codingVectorDecoder.getMaxPackets());
         assert(p.getPayload().getLength() == payloadCoordinatesCount);
         
-        try {
+    
+        Map<Integer, F256Vector> decoded = codingVectorDecoder.addVector(p.getCodingVector());
 
-            Map<Integer, F256Vector> decoded = codingVectorDecoder.addVector(p.getCodingVector());
-            
-            /* add the current packet only if it was linearly independant, this
-             will be used to decode future packets*/
-            packets.add(p);
-
-            /* decode the new packets that can be decoded */
-            Vector<UncodedPacket> output = new Vector<UncodedPacket>();
-            
-            for ( Map.Entry<Integer, F256Vector> entry : decoded.entrySet() ) {
-
-                F256Vector decodedPayload = decodePayload(entry.getValue());
-
-                output.add(new UncodedPacket((int) entry.getKey(), decodedPayload.coordinates));
-
-            }
-
-            return output;
-
-            
-        } catch (LinearDependantException ex) {
-            return new Vector<UncodedPacket>();
+        if (decoded == null) {
+        	return new ArrayList<UncodedPacket>();
         }
+        
+        /* add the current packet only if it was linearly independant, this
+         will be used to decode future packets*/
+        packets.add(p);
+
+        /* decode the new packets that can be decoded */
+        ArrayList<UncodedPacket> output = new ArrayList<UncodedPacket>();
+        
+        for ( Map.Entry<Integer, F256Vector> entry : decoded.entrySet() ) {
+
+            F256Vector decodedPayload = decodePayload(entry.getValue());
+
+            output.add(new UncodedPacket((int) entry.getKey(), decodedPayload.coordinates));
+
+        }
+
+        return output;         
         
     }
 
@@ -146,6 +142,12 @@ public class F256PacketDecoder {
     }
 
     
+    /**
+     * Returns a list of the coded packets that have been added to the decoder
+     * 
+     * @return a list of the coded packets added to the decoder
+     * 
+     */
     public List<F256CodedPacket> getCodedPackets() {
     	return packets;
     }

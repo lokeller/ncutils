@@ -52,7 +52,6 @@ public class F256Vector {
      * Constructs a vector
      *
      * @param len the number of coordinates of the vector
-     * @param ff the finite field used to define the vector
      */
     public F256Vector(int len) {        
         coordinates = new byte[len];
@@ -172,7 +171,13 @@ public class F256Vector {
 
         return out;
     }
-    
+
+    /**
+     * Adds to each of the coordinates of this vector the corresponding coordinate in
+     * the other vector
+     * 
+     * @param vector a second vector to be added
+     */
     public void addInPlace(F256Vector vector) {
 
         for ( int i = 0 ; i < len ; i++ ) {
@@ -199,12 +204,31 @@ public class F256Vector {
 
     }
     
+    /**
+     * Multiplies each of the coordinates of this vector by a given
+     * constant.
+     * 
+     * @param c a constant that is used to multiply the vector coordinates
+     */
     public void scalarMultiplyInPlace(int c) {
     	for ( int i = 0 ; i < len ; i++ ) {
             coordinates[i+offset] = (byte) ff.mul[((int) coordinates[i+offset]) & 0xFF][c];
         }    
     }
     
+    /**
+     * 
+     * Returns a copy of this vector where to each coordinate of this vector 
+     * the corresponding coordinate in another vector multiplied by a give 
+     * constant has been added.
+     * 
+     * 
+     * @param c a constant value
+     * @param other a vector
+     * 
+     * @return a copy of this vector to which a scalar multiple of the other vector
+     * has been added
+     */
     public F256Vector multiplyAndAdd(int c, F256Vector other) {
     	        
         F256Vector out = new F256Vector(len);
@@ -217,6 +241,13 @@ public class F256Vector {
     	
     }
 
+    /**
+     * Adds to each coordinate of this vector a the corresponding coordinate
+     * of antother vector multiplied by a constant 
+     * 
+     * @param c a constant
+     * @param other the vector to be multiplied and added
+     */
     public void multiplyAndAddInPlace(int c, F256Vector other) {
 
         for ( int i = 0 ; i < len ; i++ ) {
