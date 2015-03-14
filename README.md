@@ -1,4 +1,4 @@
-## NC Utils ##
+## Network Coding Utilities ##
 **WARNING: the code released has still to be considered experimental and may contain serious bugs. Use it with caution.**
 
 This project is composed by three libraries:
