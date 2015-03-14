@@ -1,10 +1,12 @@
-## Description ##
+## NC Utils ##
 **WARNING: the code released has still to be considered experimental and may contain serious bugs. Use it with caution.**
 
 This project is composed by three libraries:
 
   * ncutils-java and ncutils-c: these two libraries provide slow but flexible functions to implement network coding ideas both in pure Java and C.
   * ncutils-codec: this library provides an implementation of random network coding over F2^8. This library is faster than the above but is less flexible. It includes native code to accelerate both encoding and decoding.
+
+You can download releases of this source code from https://github.com/lokeller/ncutils/releases.
 
 ### ncutils-java and ncutils-c ###
 
