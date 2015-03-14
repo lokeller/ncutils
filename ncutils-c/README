@@ -1,0 +1,8 @@
+Documentation of the API can be found in the ncutils.h file.
+
+For an example of the usage look at the main.c file.
+
+To use the library in your project include the file ncutils.h, compile
+the *.c files in this directory and link them with your executable. You
+also need to link your executable to the m library (-lm).
+
