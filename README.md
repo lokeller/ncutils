@@ -16,13 +16,13 @@ These libraries provide a set of functions that can be used to implement network
   * Coding vector decoding for linear network codes (matrix inversion over finite fields)
   * Packet decoding for linear network codes: given a set of linearly coded packets reconstruct the original uncoded packets
 
-An example of the usage of the API is provided [here](http://code.google.com/p/ncutils/wiki/Documentation?tm=6).
+An example of the usage of the API is provided in `TUTORIAL.md`.
 
 ### ncutils-codec ###
 
 This Java library can be used to implement support of random network coding in a Java application. The API is very simple. If the platform is supported the library uses JNI and a native library to accelerate encoding and decoding otherwise it falls back to a pure Java implementation. The binary distributed on this website includes already compiled native code for Linux i386 and amd64. The native code should be easily compiled on other platforms too (tested on Android ARM).
 
-An example of the usage of the library can be found [here](http://code.google.com/p/ncutils/source/browse/examples/java/Example.java?repo=ncutils-codec)
+An example of the usage of the library can be found `ncutils-codec/examples/java/Example.java`.
 
 ## Contributions are welcome ##
 
