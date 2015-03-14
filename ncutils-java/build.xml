@@ -1,0 +1,57 @@
+<project basedir="." default="zip">
+
+	<property name="version" value="0.3"/>
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="build/classes"/>
+		<javac srcdir="src" destdir="build/classes"/>
+	</target>
+
+	<target name="compile-tests">
+		<mkdir dir="build/classes-tests"/>
+		<javac srcdir="test" destdir="build/classes-tests">
+			<classpath>
+				<pathelement location="build/classes"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="test" depends="compile,compile-tests">
+		<mkdir dir="build/reports"/>
+		<junit haltonfailure="yes">
+			 <classpath>
+				 <pathelement location="build/classes-tests"/>
+				 <pathelement location="build/classes"/>
+			</classpath>
+
+			<formatter type="plain"/>
+
+			<batchtest fork="yes" todir="build/reports">
+				<fileset dir="test">
+					<include name="**/*Test*.java"/>
+					<exclude name="**/FullTestSuite.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="build/jar"/>
+		<jar destfile="build/jar/NCUtils-${version}.jar" basedir="build/classes">
+			<fileset dir="src" />
+		</jar>
+	</target>
+
+	<target name="zip" depends="compile, jar">
+		<zip destfile="NCUtils-java-${version}.zip">
+			<zipfileset dir="examples" prefix="examples"/>
+			<fileset file="README.txt"/>
+			<fileset file="build/jar/NCUtils-${version}.jar"/>
+		</zip>
+	</target>
+
+</project>
