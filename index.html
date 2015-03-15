@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>NCUtils by lokeller</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>NCUtils</h1>
+        <p>Network Coding Utilities </p>
+
+        <p class="view"><a href="https://github.com/lokeller/ncutils">View the Project on GitHub <small>lokeller/ncutils</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/lokeller/ncutils/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/lokeller/ncutils/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/lokeller/ncutils">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a id="network-coding-utilities" class="anchor" href="#network-coding-utilities" aria-hidden="true"><span class="octicon octicon-link"></span></a>Network Coding Utilities</h2>
+
+<p><strong>WARNING: the code released has still to be considered experimental and may contain serious bugs. Use it with caution.</strong></p>
+
+<p>This project is composed by three libraries:</p>
+
+<ul>
+<li>ncutils-java and ncutils-c: these two libraries provide slow but flexible functions to implement network coding ideas both in pure Java and C.</li>
+<li>ncutils-codec: this library provides an implementation of random network coding over F2^8. This library is faster than the above but is less flexible. It includes native code to accelerate both encoding and decoding.</li>
+</ul>
+
+<p>You can download releases of this source code from <a href="https://github.com/lokeller/ncutils/releases">https://github.com/lokeller/ncutils/releases</a>.</p>
+
+<h3>
+<a id="ncutils-java-and-ncutils-c" class="anchor" href="#ncutils-java-and-ncutils-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>ncutils-java and ncutils-c</h3>
+
+<p>These libraries provide a set of functions that can be used to implement network coding techniques in applications:</p>
+
+<ul>
+<li>Implementation of finite field operations over GF(p) where p is a prime and GF(2^m)</li>
+<li>Coding vector decoding for linear network codes (matrix inversion over finite fields)</li>
+<li>Packet decoding for linear network codes: given a set of linearly coded packets reconstruct the original uncoded packets</li>
+</ul>
+
+<p>An example of the usage of the API is provided at <a href="https://github.com/lokeller/ncutils/blob/master/TUTORIAL.md">https://github.com/lokeller/ncutils/blob/master/TUTORIAL.md</a>.</p>
+
+<h3>
+<a id="ncutils-codec" class="anchor" href="#ncutils-codec" aria-hidden="true"><span class="octicon octicon-link"></span></a>ncutils-codec</h3>
+
+<p>This Java library can be used to implement support of random network coding in a Java application. The API is very simple. If the platform is supported the library uses JNI and a native library to accelerate encoding and decoding otherwise it falls back to a pure Java implementation. The binary distributed on this website includes already compiled native code for Linux i386 and amd64. The native code should be easily compiled on other platforms too (tested on Android ARM).</p>
+
+<p>An example of the usage of the library can be found <code>ncutils-codec/examples/java/Example.java</code>.</p>
+
+<h2>
+<a id="contributions-are-welcome" class="anchor" href="#contributions-are-welcome" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributions are welcome</h2>
+
+<p>The performance of the code has not been fully optimized, any improvement is welcome. If you have any other comment about how to make this project more useful feel free to contact the project maintainer.</p>
+
+<p>If you are interested in contributing some code of general interest feel free to contact the project maintainer. Keep however in mind that the code should be reasonably well documented in order to be useful to others.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/lokeller">lokeller</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
