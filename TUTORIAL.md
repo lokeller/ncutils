@@ -42,7 +42,8 @@ The next step is to create `CodedPacket`s that can be transmitted and combined. 
 ```
 CodedPacket[] codewords = new CodedPacket[blockNumber];
 
-for ( int i = 0 ; i < blockNumber ; i++) {
+for ( int i = 0 ; i < blockNumber ; i++) */ for loop is a repetition control structure that allows you to efficiently write a loop that needs to execute a specific number of times,here specific numbers of times is less than block number
+{
     codewords[i] = new CodedPacket( inputPackets[i], blockNumber, ff);
 }
 ```
